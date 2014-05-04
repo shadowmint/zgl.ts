@@ -1,0 +1,16 @@
+{
+  "name": "dsync",
+  "version": "0.0.1",
+  "author": "",
+  "description": "",
+  "homepage": "",
+  "private": true,
+  "devDependencies": {
+    "typescript": "~1.0.0",
+    "grunt-ts": "~1.6.4",
+    "grunt-contrib-clean": "~0.5.0",
+  },
+  "scripts": {
+    "dev": "npm install && grunt dev"
+  }
+}

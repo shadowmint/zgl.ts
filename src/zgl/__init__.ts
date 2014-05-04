@@ -1,0 +1,10 @@
+/// <reference path="interfaces/__init__.ts"/>
+/// <reference path="data/__init__.ts"/>
+/// <reference path="geom/__init__.ts"/>
+/// <reference path="viewports/__init__.ts"/>
+/// <reference path="events/__init__.ts"/>
+/// <reference path="logger/__init__.ts"/>
+/// <reference path="errors/__init__.ts"/>
+/// <reference path="random/__init__.ts"/>
+/// <reference path="assets/__init__.ts"/>
+/// <reference path="promise/__init__.ts"/>
