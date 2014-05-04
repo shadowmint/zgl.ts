@@ -1,5 +1,5 @@
 /// <reference path="__init__.ts"/>
-module xn {
+module zgl {
 
     /* A memory block of values */
     export class Mem {
@@ -74,7 +74,7 @@ module xn {
                     var rtn:any = new Float32Array(this.mem.data, this.block * offset, this.mem.size / this.block);
                     return <T> rtn;
             }
-            throw new xn.Error('Invalid type: ' + type);
+            throw new Error('Invalid type: ' + type);
         }
 
         /* Convenience function for a simple data element */

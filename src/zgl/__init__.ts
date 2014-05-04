@@ -1,10 +1,6 @@
-/// <reference path="interfaces/__init__.ts"/>
-/// <reference path="data/__init__.ts"/>
-/// <reference path="geom/__init__.ts"/>
-/// <reference path="viewports/__init__.ts"/>
-/// <reference path="events/__init__.ts"/>
-/// <reference path="logger/__init__.ts"/>
-/// <reference path="errors/__init__.ts"/>
-/// <reference path="random/__init__.ts"/>
-/// <reference path="assets/__init__.ts"/>
-/// <reference path="promise/__init__.ts"/>
+/// <reference path="block.ts"/>
+/// <reference path="matrix.ts"/>
+/// <reference path="shader.ts"/>
+/// <reference path="context.ts"/>
+
+// refs: http://codeflow.org/entries/2013/feb/22/how-to-write-portable-webgl/

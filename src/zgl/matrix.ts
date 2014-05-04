@@ -1,5 +1,5 @@
 /// <reference path="__init__.ts"/>
-module xn {
+module zgl {
 
     /* Cached matrix values for fast operations */
     module matrix {
@@ -25,12 +25,6 @@ module xn {
             rotatey = factory();
             rotatez = factory();
             scale = factory();
-            xn.log(unity.data);
-            xn.log(translate.data);
-            xn.log(rotatex.data);
-            xn.log(rotatey.data);
-            xn.log(rotatez.data);
-            xn.log(scale.data);
             ready = true;
         }
     }
@@ -39,11 +33,11 @@ module xn {
     export class Mat4 {
 
         /* The actual data for this matrix */
-        public _data:xn.Vp<Float32Array>;
+        public _data:zgl.Vp<Float32Array>;
 
         constructor() {
             if (!matrix.ready) { matrix.init(); }
-            this._data = xn.Vp.factory<Float32Array>(Float32Array, 16);
+            this._data = zgl.Vp.factory<Float32Array>(Float32Array, 16);
             this.unity();
         }
 
@@ -72,7 +66,6 @@ module xn {
             var s00 = d[0]; var s10 = d[1]; var s20 = d[2]; var s30 = d[3]; var s01 = d[4]; var s11 = d[5]; var s21 = d[6]; var s31 = d[7]; var s02 = d[8]; var s12 = d[9]; var s22 = d[10]; var s32 = d[11]; var s03 = d[12]; var s13 = d[13]; var s23 = d[14]; var s33 = d[15];
             var m00 = m[0]; var m10 = m[1]; var m20 = m[2]; var m30 = m[3]; var m01 = m[4]; var m11 = m[5]; var m21 = m[6]; var m31 = m[7]; var m02 = m[8]; var m12 = m[9]; var m22 = m[10]; var m32 = m[11]; var m03 = m[12]; var m13 = m[13]; var m23 = m[14]; var m33 = m[15];
             d[0] = s00 * m00 + s10 * m01 + s20 * m02 + s30 * m03;
-            xn.log(s00, m10, s10, m11, s20, m12, s30, m13);
             d[1] = s00 * m10 + s10 * m11 + s20 * m12 + s30 * m13;
             d[2] = s00 * m20 + s10 * m21 + s20 * m22 + s30 * m23;
             d[3] = s00 * m30 + s10 * m31 + s20 * m32 + s30 * m33;
@@ -88,7 +81,6 @@ module xn {
             d[13] = s03 * m10 + s13 * m11 + s23 * m12 + s33 * m13;
             d[14] = s03 * m20 + s13 * m21 + s23 * m22 + s33 * m23;
             d[15] = s03 * m30 + s13 * m31 + s23 * m32 + s33 * m33;
-            xn.log(d);
             return this;
         }
 
