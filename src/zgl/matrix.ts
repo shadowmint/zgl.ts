@@ -41,6 +41,11 @@ module zgl {
             this.unity();
         }
 
+        /* Return raw data item */
+        public raw():Float32Array {
+            return this._data.data;
+        }
+
         /* Reset to unity value */
         public unity():Mat4 {
             this._data.memset(0, matrix.unity, 0, 16);

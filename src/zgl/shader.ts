@@ -13,6 +13,21 @@ module zgl {
         FRAGMENT
     }
 
+    /* Types of buffers that can be bound */
+    export enum BufferType {
+        UNIFORM_MAT4,
+        VERTEX_FLOAT3
+    }
+
+    /* The currently held config for a buffer binding */
+    interface BufferBinding {
+        attribute:string;
+        type:BufferType;
+        location:any;
+        buffer:any;
+        dirty:boolean;
+    }
+
     /* A shader instance */
     export class Shader {
 
@@ -115,6 +130,9 @@ module zgl {
         /* The shaders used */
         public shaders:Shaders;
 
+        /* Attribute binding */
+        private _bindings:{[key:string]:BufferBinding} = {};
+
         /*
          * Create a program for a set of shaders
          * @param gl The gl context
@@ -156,6 +174,68 @@ module zgl {
             }
             this.program = program;
             this.shaders = this.shaders;
+        }
+
+        /* Bind a buffer to an attribute for a shader */
+        public bind(attribute:string, type:BufferType, buffer:any = null):void {
+            if (this._bindings[attribute]) {
+                throw new Error('Invalid attribute name "' + attribute + '" already in use');
+            }
+            this._bindings[attribute] = {
+                attribute:attribute,
+                type:type,
+                buffer:buffer,
+                location:null,
+                dirty:true
+            }
+        }
+
+        /* Assign a buffer for this renderer */
+        public buffer(attribute:string, buffer:any):void {
+            if (!this._bindings[attribute]) {
+                throw new Error('')
+            }
+            this._bindings[attribute].buffer = buffer;
+            this._bindings[attribute].dirty = true;
+        }
+
+        /* Rebind buffers to the program */
+        public load(gl:any):void {
+
+            // Load the program
+            gl.useProgram(this.program);
+
+            // Now bind each buffer to each program location
+            for (var key in this._bindings) {
+
+                // Get the attribute binding
+                var attrib = this._bindings[key];
+
+                // Get the location
+                switch(attrib.type) {
+                    case BufferType.UNIFORM_MAT4:
+                        attrib.location = gl.getUniformLocation(this.program, attrib.attribute);
+                        break;
+
+                    case BufferType.VERTEX_FLOAT3:
+                        attrib.location = gl.getAttribLocation(this.program, attrib.attribute);
+                        break;
+                }
+
+                // Bind buffer
+                if (attrib.dirty) {
+                    switch(attrib.type) {
+                        case BufferType.UNIFORM_MAT4:
+                            gl.uniformMatrix4fv(attrib.location, false, attrib.buffer);
+                            break;
+
+                        case BufferType.VERTEX_FLOAT3:
+                            gl.enableVertexAttribArray(attrib.location);
+                            gl.vertexAttribPointer(attrib.location, 3, gl.FLOAT, false, 0, 0);
+                            break;
+                    }
+                }
+            }
         }
     }
 }

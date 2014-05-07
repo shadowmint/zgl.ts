@@ -19,6 +19,9 @@ module zgl {
         /* Debugging? */
         private _debug:boolean = false;
 
+        /* Running the runner utility */
+        private _running:boolean = false;
+
         /*
          * Create a new context from a canvas
          * NB. The canvas size is not the *style* size, it is given by:
@@ -58,6 +61,25 @@ module zgl {
         /* Set the viewport to the size of the canvas */
         public viewport():void {
             this.gl.viewport(0, 0, this.width, this.height);
+        }
+
+        /* Run per-animation frame actions */
+        public run(action:any):void {
+            if (!this._running) {
+                this._running = true;
+                var worker = () => {
+                    action();
+                    if (this._running) {
+                        requestAnimationFrame(worker);
+                    }
+                };
+                requestAnimationFrame(worker);
+            }
+        }
+
+        /* Stop the animation handler */
+        public stop():void {
+            this._running = false;
         }
     }
 
