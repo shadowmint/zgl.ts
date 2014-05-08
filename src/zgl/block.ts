@@ -4,8 +4,14 @@ module zgl {
     /* A memory block of values */
     export class Mem {
 
+        /* The GL buffer target */
+        public buffer:any = null;
+
         /* A data block of memeory */
         public data:ArrayBuffer;
+
+        /* Open gl context */
+        private _glc:zgl.Context;
 
         /* Size of this memory block */
         public size:number;
@@ -20,6 +26,29 @@ module zgl {
           var dstU8 = new Uint8Array(this.data, offset, bytes);
           var srcU8 = new Uint8Array(src.data, srcOffset, bytes);
           dstU8.set(srcU8);
+        }
+
+        /* Convert this block into an opengl buffer */
+        private _bind():void {
+            var gl = this._glc.gl;
+            this.buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+        }
+
+        /* Push the inner data into the gl buffer */
+        public push(glc:zgl.Context, mode:any):void {
+            this._glc = glc;
+            var gl = this._glc.gl;
+            if (this.buffer == null) {
+                this._bind();
+            }
+            gl.bufferData(gl.ARRAY_BUFFER, this.data, mode);
+        }
+
+        /* Release this buffer */
+        public release():void {
+            // TODO
+            // gl.DestoryBuffer(...)?
         }
     }
 

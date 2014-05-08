@@ -46,6 +46,11 @@ module zgl {
             return this._data.data;
         }
 
+        /* Return the vp for this matrix */
+        public vp():Vp<Float32Array> {
+            return this._data;
+        }
+
         /* Reset to unity value */
         public unity():Mat4 {
             this._data.memset(0, matrix.unity, 0, 16);

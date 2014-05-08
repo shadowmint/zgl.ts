@@ -47,12 +47,12 @@ module zgl {
                 if (!window['WebGLDebugUtils']) {
                     throw new Error('Debugging is only possible if <script src="https://www.khronos.org/registry/webgl/sdk/debug/webgl-debug.js"></script> is loaded');
                 }
-                this.gl = window['WebGLDebugUtils'].makeDebugContext(this.gl, (err) => (this._trace(err.toString())));
+                this.gl = window['WebGLDebugUtils'].makeDebugContext(this.gl, (err) => (this.trace('zgl error: ' + err.toString())));
             }
         }
 
         /* Trace debugging errors to console; monkey patch to update */
-        private _trace(msg:string):void {
+        private trace(msg:string):void {
             if (window['console']) {
                 window['console'].log(msg);
             }
