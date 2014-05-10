@@ -115,10 +115,10 @@ module zgl {
         }
 
         /* Convenience function for a simple data element */
-        public static factory<U extends TypedArray>(T:any, length:number):Buffer<U> {
-            var size = T['BYTES_PER_ELEMENT'] * length;
+        public static factory(length:number):Buffer<Float32Array> {
+            var size = Float32Array['BYTES_PER_ELEMENT'] * length;
             var mem = new Mem(size);
-            return new Buffer<U>(T, mem, 0);
+            return new Buffer<Float32Array>(Float32Array, mem, 0);
         }
 
         /*
