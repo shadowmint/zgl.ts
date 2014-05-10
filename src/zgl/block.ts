@@ -33,9 +33,17 @@ module zgl {
             var gl = this._glc.gl;
             this.buffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+            if (gl.getError() != gl.NO_ERROR) {
+                throw new Error("Error buffering data element");
+            }
         }
 
-        /* Push the inner data into the gl buffer */
+        /*
+         * Push the inner data into the gl buffer
+         *
+         * Notice this is only required for per-vertex attributes; for
+         * uniform values there's no need to invoke this.
+         */
         public push(glc:zgl.Context, mode:any):void {
             this._glc = glc;
             var gl = this._glc.gl;
@@ -59,7 +67,7 @@ module zgl {
     }
 
     /* Vritual memory block point; A pointer to a section of a memory block */
-    export class Vp<T extends TypedArray> {
+    export class Buffer<T extends TypedArray> {
 
         /* Data view only */
         public data:T;
@@ -107,10 +115,10 @@ module zgl {
         }
 
         /* Convenience function for a simple data element */
-        public static factory<U extends TypedArray>(T:any, length:number):Vp<U> {
+        public static factory<U extends TypedArray>(T:any, length:number):Buffer<U> {
             var size = T['BYTES_PER_ELEMENT'] * length;
             var mem = new Mem(size);
-            return new Vp<U>(T, mem, 0);
+            return new Buffer<U>(T, mem, 0);
         }
 
         /*
@@ -120,12 +128,12 @@ module zgl {
          * @param srcOffset The offset into the source for elements
          * @param items The number of items to copy over
          */
-        public memset(offset:number, src:Vp<T>, srcOffset:number, items:number) {
+        public memset(offset:number, src:Buffer<T>, srcOffset:number, items:number) {
             this.mem.memset(offset * this.block, src.mem, srcOffset * this.block, items * this.block);
         }
 
         /* Set values from an array of the correct type */
-        public set(data:any[]):Vp<T> {
+        public set(data:any[]):Buffer<T> {
             this.data.set(data);
             return this;
         }

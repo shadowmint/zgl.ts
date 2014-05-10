@@ -10,6 +10,7 @@ module zgl {
     /* Types of buffers that can be bound */
     export enum BufferType {
         UNIFORM_MAT4,
+        UNIFORM_FLOAT,
         VERTEX_FLOAT3,
         VERTEX_FLOAT4
     }
@@ -99,9 +100,9 @@ module zgl {
         }
 
         /* Assign a buffer for this renderer */
-        public buffer(attribute:string, buffer:zgl.Vp):void {
+        public buffer(attribute:string, buffer:zgl.Buffer<Float32Array>):void {
             if (!this._bindings[attribute]) {
-                throw new Error('')
+                throw new Error('Unable to buffer unknown attribute "' + attribute + '"');
             }
             this._bindings[attribute].buffer = buffer;
             this._bindings[attribute].dirty = true;
@@ -113,11 +114,7 @@ module zgl {
             var gl = this._glc.gl;
 
             // Load the program
-            console.log("Pre use");
-            console.log(gl.getError());
             gl.useProgram(this.program);
-            console.log("Post use");
-            console.log(gl.getError());
 
             // Now bind each buffer to each program location
             for (var key in this._bindings) {
@@ -127,6 +124,7 @@ module zgl {
 
                 // Get the location
                 switch(attrib.type) {
+                    case BufferType.UNIFORM_FLOAT:
                     case BufferType.UNIFORM_MAT4:
                         attrib.location = gl.getUniformLocation(this.program, attrib.attribute);
                         if (attrib.location == null) {
@@ -136,36 +134,34 @@ module zgl {
 
                     case BufferType.VERTEX_FLOAT3:
                     case BufferType.VERTEX_FLOAT4:
-                        console.log(attrib.attribute);
                         attrib.location = gl.getAttribLocation(this.program, attrib.attribute);
-                        console.log(attrib.location);
-                        console.log(gl.getError());
                         if (attrib.location == null) {
                             throw new Error('Invalid attribute: "' + attrib.attribute + '": ' + gl.getError());
                         }
                         break;
                 }
 
-                // Bind buffer
-                if (attrib.dirty) {
-                    switch(attrib.type) {
-                        case BufferType.UNIFORM_MAT4:
-                            console.log(attrib.buffer);
-                            gl.uniformMatrix4fv(attrib.location, false, attrib.buffer.data);
-                            break;
+                // Bind buffer; must be done every frame.
+                switch(attrib.type) {
+                    case BufferType.UNIFORM_MAT4:
+                        gl.uniformMatrix4fv(attrib.location, false, attrib.buffer.data);
+                        break;
 
-                        case BufferType.VERTEX_FLOAT3:
-                            gl.bindBuffer(gl.ARRAY_BUFFER, attrib.buffer.mem.buffer);
-                            gl.enableVertexAttribArray(attrib.location);
-                            gl.vertexAttribPointer(attrib.location, 3, gl.FLOAT, false, 0, 0);
-                            break;
+                    case BufferType.UNIFORM_FLOAT:
+                        gl.uniform1fv(attrib.location, attrib.buffer.data);
+                        break;
 
-                        case BufferType.VERTEX_FLOAT4:
-                            gl.bindBuffer(gl.ARRAY_BUFFER, attrib.buffer.mem.buffer);
-                            gl.enableVertexAttribArray(attrib.location);
-                            gl.vertexAttribPointer(attrib.location, 4, gl.FLOAT, false, 0, 0);
-                            break;
-                    }
+                    case BufferType.VERTEX_FLOAT3:
+                        gl.bindBuffer(gl.ARRAY_BUFFER, attrib.buffer.mem.buffer);
+                        gl.enableVertexAttribArray(attrib.location);
+                        gl.vertexAttribPointer(attrib.location, 3, gl.FLOAT, false, 0, 0);
+                        break;
+
+                    case BufferType.VERTEX_FLOAT4:
+                        gl.bindBuffer(gl.ARRAY_BUFFER, attrib.buffer.mem.buffer);
+                        gl.enableVertexAttribArray(attrib.location);
+                        gl.vertexAttribPointer(attrib.location, 4, gl.FLOAT, false, 0, 0);
+                        break;
                 }
             }
         }

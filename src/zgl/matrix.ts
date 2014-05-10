@@ -4,16 +4,16 @@ module zgl {
     /* Cached matrix values for fast operations */
     module matrix {
         export var ready:boolean = false;
-        export var unity:Vp<Float32Array> = null;
-        export var translate:Vp<Float32Array> = null;
-        export var rotatex:Vp<Float32Array> = null;
-        export var rotatey:Vp<Float32Array> = null;
-        export var rotatez:Vp<Float32Array> = null;
-        export var scale:Vp<Float32Array> = null;
+        export var unity:Buffer<Float32Array> = null;
+        export var translate:Buffer<Float32Array> = null;
+        export var rotatex:Buffer<Float32Array> = null;
+        export var rotatey:Buffer<Float32Array> = null;
+        export var rotatez:Buffer<Float32Array> = null;
+        export var scale:Buffer<Float32Array> = null;
 
         /* Load matrix helpers */
         export function init():void {
-            var factory = ():Vp<Float32Array> => { return Vp.factory<Float32Array>(Float32Array, 16).set([
+            var factory = ():Buffer<Float32Array> => { return Buffer.factory<Float32Array>(Float32Array, 16).set([
                 1.0, 0.0, 0.0, 0.0,
                 0.0, 1.0, 0.0, 0.0,
                 0.0, 0.0, 1.0, 0.0,
@@ -33,11 +33,11 @@ module zgl {
     export class Mat4 {
 
         /* The actual data for this matrix */
-        public _data:zgl.Vp<Float32Array>;
+        public _data:zgl.Buffer<Float32Array>;
 
         constructor() {
             if (!matrix.ready) { matrix.init(); }
-            this._data = zgl.Vp.factory<Float32Array>(Float32Array, 16);
+            this._data = zgl.Buffer.factory<Float32Array>(Float32Array, 16);
             this.unity();
         }
 
@@ -47,7 +47,7 @@ module zgl {
         }
 
         /* Return the vp for this matrix */
-        public vp():Vp<Float32Array> {
+        public vp():Buffer<Float32Array> {
             return this._data;
         }
 
