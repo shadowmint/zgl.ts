@@ -13,7 +13,7 @@ module zgl {
 
         /* Load matrix helpers */
         export function init():void {
-            var factory = ():Buffer<Float32Array> => { return Buffer.factory<Float32Array>(Float32Array, 16).set([
+            var factory = ():Buffer<Float32Array> => { return Buffer.factory(16).set([
                 1.0, 0.0, 0.0, 0.0,
                 0.0, 1.0, 0.0, 0.0,
                 0.0, 0.0, 1.0, 0.0,
@@ -37,7 +37,7 @@ module zgl {
 
         constructor() {
             if (!matrix.ready) { matrix.init(); }
-            this._data = zgl.Buffer.factory<Float32Array>(Float32Array, 16);
+            this._data = zgl.Buffer.factory(16);
             this.unity();
         }
 
