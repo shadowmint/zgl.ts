@@ -9,8 +9,10 @@ module zgl {
 
     /* Types of buffers that can be bound */
     export enum BufferType {
+        UNIFORM_SAMPLER,
         UNIFORM_MAT4,
         UNIFORM_FLOAT,
+        VERTEX_FLOAT2,
         VERTEX_FLOAT3,
         VERTEX_FLOAT4
     }
@@ -124,6 +126,7 @@ module zgl {
 
                 // Get the location
                 switch(attrib.type) {
+                    case BufferType.UNIFORM_SAMPLER:
                     case BufferType.UNIFORM_FLOAT:
                     case BufferType.UNIFORM_MAT4:
                         attrib.location = gl.getUniformLocation(this.program, attrib.attribute);
@@ -132,6 +135,7 @@ module zgl {
                         }
                         break;
 
+                    case BufferType.VERTEX_FLOAT2:
                     case BufferType.VERTEX_FLOAT3:
                     case BufferType.VERTEX_FLOAT4:
                         attrib.location = gl.getAttribLocation(this.program, attrib.attribute);
@@ -143,12 +147,25 @@ module zgl {
 
                 // Bind buffer; must be done every frame.
                 switch(attrib.type) {
+
+                    case BufferType.UNIFORM_SAMPLER:
+                        gl.activeTexture(gl.TEXTURE0);
+                        gl.bindTexture(gl.TEXTURE_2D, attrib.buffer);
+                        gl.uniform1i(attrib.location, 0);
+                        break;
+
                     case BufferType.UNIFORM_MAT4:
                         gl.uniformMatrix4fv(attrib.location, false, attrib.buffer.data);
                         break;
 
                     case BufferType.UNIFORM_FLOAT:
                         gl.uniform1fv(attrib.location, attrib.buffer.data);
+                        break;
+
+                    case BufferType.VERTEX_FLOAT2:
+                        gl.bindBuffer(gl.ARRAY_BUFFER, attrib.buffer.mem.buffer);
+                        gl.enableVertexAttribArray(attrib.location);
+                        gl.vertexAttribPointer(attrib.location, 2, gl.FLOAT, false, 0, 0);
                         break;
 
                     case BufferType.VERTEX_FLOAT3:
