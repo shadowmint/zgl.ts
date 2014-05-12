@@ -127,7 +127,7 @@ module zgl {
          */
         public bufferData(buffer:zgl.Buffer<Float32Array>, mode:any):void {
             var gl = this._glc.gl;
-            if (this.buffer == null) {
+            if (buffer.mem.buffer == null) {
                 this._bindBuffer(buffer.mem);
             }
             console.log("Buffer:" + buffer.mem.buffer);
