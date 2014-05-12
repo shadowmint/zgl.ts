@@ -130,7 +130,10 @@ module zgl {
             if (this.buffer == null) {
                 this._bindBuffer(buffer.mem);
             }
+            console.log("Buffer:" + buffer.mem.buffer);
+            console.log(gl.getError());
             gl.bufferData(gl.ARRAY_BUFFER, buffer.mem.buffer, mode);
+            console.log(gl.getError());
         }
 
         /* Release the given buffer */
