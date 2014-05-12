@@ -24,6 +24,7 @@ module zgl {
         location:any;
         buffer:any;
         dirty:boolean;
+        mode:any;
     }
 
     /** A shader program */
@@ -97,43 +98,53 @@ module zgl {
                 type:type,
                 buffer:buffer,
                 location:null,
-                dirty:true
+                dirty:true,
+                mode:null
             }
         }
 
         /* Assign a buffer for this renderer */
-        public buffer(attribute:string, buffer:zgl.Buffer<Float32Array>):void {
+        public buffer(attribute:string, buffer:zgl.Buffer<Float32Array>, mode:any = null):void {
             if (!this._bindings[attribute]) {
                 throw new Error('Unable to buffer unknown attribute "' + attribute + '"');
             }
             this._bindings[attribute].buffer = buffer;
             this._bindings[attribute].dirty = true;
+            this._bindings[attribute].mode = mode;
+            this.update(attribute);
         }
 
         /* Convert this block into an opengl buffer */
-        private _bindBuffer(mem:zgl.Mem):void {
+        private _createBuffer(mem:zgl.Mem):void {
             var gl = this._glc.gl;
             mem.buffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, mem.buffer);
             if (gl.getError() != gl.NO_ERROR) {
-                throw new Error("Error buffering data element");
+                throw new Error("Error creating data buffer");
             }
         }
 
         /*
          * Push the inner data into the gl buffer
-         * Notice this is only required for per-vertex attributes; for
-         * uniform values there's no need to invoke this.
+         * Notice this is only required for per-vertex attributes; for uniform values there
+         * is no need to invoke this; and if the mode is not specified it does nothing.
          */
-        public bufferData(buffer:zgl.Buffer<Float32Array>, mode:any):void {
-            var gl = this._glc.gl;
-            if (buffer.mem.buffer == null) {
-                this._bindBuffer(buffer.mem);
+        public update(attribute:string):void {
+            if (!this._bindings[attribute]) {
+                throw new Error('Unable to buffer data for unknown attribute "' + attribute + '"');
             }
-            console.log("Buffer:" + buffer.mem.buffer);
-            console.log(gl.getError());
-            gl.bufferData(gl.ARRAY_BUFFER, buffer.mem.buffer, mode);
-            console.log(gl.getError());
+            var gl = this._glc.gl;
+            var buffer = this._bindings[attribute].buffer;
+            var mode = this._bindings[attribute].mode;
+            if (mode != null) {
+                if (buffer.mem.buffer == null) {
+                    this._createBuffer(buffer.mem);
+                }
+                gl.bufferData(gl.ARRAY_BUFFER, buffer.mem.data, mode);
+                if (gl.getError() != gl.NO_ERROR) {
+                    throw new Error("Error buffering data on array");
+                }
+            }
         }
 
         /* Release the given buffer */
