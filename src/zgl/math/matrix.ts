@@ -1,4 +1,4 @@
-/// <reference path="__init__.ts"/>
+/// <reference path="../__init__.ts"/>
 module zgl {
 
     /* Cached matrix values for fast operations */

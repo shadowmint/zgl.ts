@@ -1,10 +1,10 @@
-/// <reference path="__init__.ts"/>
+/// <reference path="../__init__.ts"/>
 module zgl {
 
     /* A memory block of values */
     export class Mem {
 
-        /* The GL buffer target */
+        /* The GL buffer target, or any other native binding */
         public buffer:any = null;
 
         /* A data block of memeory */
@@ -28,36 +28,6 @@ module zgl {
           dstU8.set(srcU8);
         }
 
-        /* Convert this block into an opengl buffer */
-        private _bind():void {
-            var gl = this._glc.gl;
-            this.buffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-            if (gl.getError() != gl.NO_ERROR) {
-                throw new Error("Error buffering data element");
-            }
-        }
-
-        /*
-         * Push the inner data into the gl buffer
-         *
-         * Notice this is only required for per-vertex attributes; for
-         * uniform values there's no need to invoke this.
-         */
-        public push(glc:zgl.Context, mode:any):void {
-            this._glc = glc;
-            var gl = this._glc.gl;
-            if (this.buffer == null) {
-                this._bind();
-            }
-            gl.bufferData(gl.ARRAY_BUFFER, this.data, mode);
-        }
-
-        /* Release this buffer */
-        public release():void {
-            // TODO
-            // gl.DestoryBuffer(...)?
-        }
     }
 
     /* Minimal api we expect on typed arrays */

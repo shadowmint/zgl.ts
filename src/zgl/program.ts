@@ -110,6 +110,35 @@ module zgl {
             this._bindings[attribute].dirty = true;
         }
 
+        /* Convert this block into an opengl buffer */
+        private _bindBuffer(mem:zgl.Mem):void {
+            var gl = this._glc.gl;
+            mem.buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, mem.buffer);
+            if (gl.getError() != gl.NO_ERROR) {
+                throw new Error("Error buffering data element");
+            }
+        }
+
+        /*
+         * Push the inner data into the gl buffer
+         * Notice this is only required for per-vertex attributes; for
+         * uniform values there's no need to invoke this.
+         */
+        public bufferData(buffer:zgl.Buffer<Float32Array>, mode:any):void {
+            var gl = this._glc.gl;
+            if (this.buffer == null) {
+                this._bindBuffer(buffer.mem);
+            }
+            gl.bufferData(gl.ARRAY_BUFFER, buffer.mem.buffer, mode);
+        }
+
+        /* Release the given buffer */
+        public releaseBuffer(buffer:zgl.Buffer<Float32Array>):void {
+            // TODO
+            // gl.DestoryBuffer(buffer['buffer'])
+        }
+
         /* Rebind buffers to the program */
         public load():void {
 
