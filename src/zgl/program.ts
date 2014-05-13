@@ -89,14 +89,14 @@ module zgl {
         }
 
         /* Bind a buffer to an attribute for a shader */
-        public bind(attribute:string, type:BufferType, buffer:any = null):void {
+        public bind(attribute:string, type:BufferType):void {
             if (this._bindings[attribute]) {
                 throw new Error('Invalid attribute name "' + attribute + '" already in use');
             }
             this._bindings[attribute] = {
                 attribute:attribute,
                 type:type,
-                buffer:buffer,
+                buffer:null,
                 location:null,
                 dirty:true,
                 mode:null
@@ -147,10 +147,15 @@ module zgl {
             }
         }
 
-        /* Release the given buffer */
-        public releaseBuffer(buffer:zgl.Buffer<Float32Array>):void {
-            // TODO
-            // gl.DestoryBuffer(buffer['buffer'])
+        /* Release the buffer for a given attribute */
+        public release(attribute:string):void {
+            if (this._bindings[attribute]) {
+                var buffer = this._bindings[attribute].buffer;
+                if (buffer.mem.buffer) {
+                    // gl.DestoryBuffer(buffer['buffer'])
+                }
+                delete this._bindings[attribute];
+            }
         }
 
         /* Rebind buffers to the program */

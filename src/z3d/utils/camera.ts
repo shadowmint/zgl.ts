@@ -1,7 +1,12 @@
-/// <reference path="__init__.ts"/>
-module zgl {
+/// <reference path="../__init__.ts"/>
+module z3d {
 
-    export class Camera {
+    export class Camera implements z3d.Geometry {
+
+        private _buffer:z3d.geom.Buffer[] = [];
+
+        constructor(projection:string, modelview:string) {
+        }
 
         /* Look at position */
 
@@ -26,5 +31,9 @@ module zgl {
         /* Orbit right around target */
 
         /* Push internal state into local camera matrix */
+
+        public data():z3d.geom.Buffer[] {
+            return this._buffer;
+        }
     }
 }
