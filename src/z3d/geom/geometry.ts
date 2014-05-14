@@ -2,6 +2,9 @@ module z3d {
 
     /* Geometry type */
     export interface Geometry {
+        offset:number;
+        size:number;
+        mode:any;
         data():geom.Buffer[];
     }
 
@@ -10,9 +13,7 @@ module z3d {
         /* Generates fields that can be rendered */
         export interface Buffer {
             attrib:string;
-            type:zgl.BufferType;
             data:zgl.Buffer<Float32Array>;
-            mode:any;
         }
 
         /* Generates geometry objects */
