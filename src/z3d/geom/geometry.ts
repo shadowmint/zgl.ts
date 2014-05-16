@@ -14,6 +14,7 @@ module z3d {
         export interface Buffer {
             attrib:string;
             data:zgl.Buffer<Float32Array>;
+            mode:any;
         }
 
         /* Generates geometry objects */

@@ -13,6 +13,9 @@ module z3d {
         private _geom:z3d.Geometry;
         private _gen:z3d.geom.Generator;
 
+        /* Camera to use */
+        private _camera:z3d.Camera;
+
         /* Load a shader and bind it as a program with buffers */
         public program:{(glc:zgl.Context):zgl.Program} = null;
 
@@ -31,6 +34,11 @@ module z3d {
         /* Set the geometry to render */
         public geometry(geom:z3d.Geometry):void {
             this._geom = geom;
+        }
+
+        /* Set the camera */
+        public camera(camera:z3d.Camera):void {
+            this._camera = camera;
         }
 
         /* Render the content of this renderer */
@@ -52,6 +60,7 @@ module z3d {
             }
 
             // Generate custom geometry if required
+            var camera = this._camera;
             var geom = this._geom;
             if (this._gen != null) {
                 geom = this._gen.process(this._geom);
@@ -59,10 +68,19 @@ module z3d {
 
             // Activate the program
             this._program.load();
+
+            // Load geometry arrays
             var buffers = geom.data();
             for (var i = 0; i < buffers.length; ++i) {
                 var buffer = buffers[i];
-                this._program.buffer(buffer.attrib, buffer.data);
+                this._program.buffer(buffer.attrib, buffer.data, buffer.mode);
+            }
+
+            // Load camera data
+            buffers = camera.data();
+            for (var i = 0; i < buffers.length; ++i) {
+                var buffer = buffers[i];
+                this._program.buffer(buffer.attrib, buffer.data, buffer.mode);
             }
 
             // Clear & draw
