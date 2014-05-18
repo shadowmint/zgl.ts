@@ -10,11 +10,12 @@ module z3d {
         private _program:zgl.Program;
 
         /* Geometry source */
-        private _geom:z3d.Geometry;
-        private _gen:z3d.geom.Generator;
+        public geometry:z3d.Geometry;
+        public generator:z3d.geom.Generator;
+        private _updated:boolean = false;
 
         /* Camera to use */
-        private _camera:z3d.Camera;
+        public camera:z3d.Camera;
 
         /* Load a shader and bind it as a program with buffers */
         public program:{(glc:zgl.Context):zgl.Program} = null;
@@ -22,27 +23,22 @@ module z3d {
         /* Update to render before every render, if required */
         public update:{(step:number):void} = null;
 
-        public constructor(canvasId:string) {
-            this._context = new zgl.Context(canvasId);
+        public constructor(context:zgl.Context) {
+            this._context = context;
         }
 
-        /* Set a geometry generator */
-        public generator(gen:z3d.geom.Generator):void {
-            this._gen = gen;
-        }
-
-        /* Set the geometry to render */
-        public geometry(geom:z3d.Geometry):void {
-            this._geom = geom;
-        }
-
-        /* Set the camera */
-        public camera(camera:z3d.Camera):void {
-            this._camera = camera;
+        /* Push content into vertex buffers for the attributes in the geometry */
+        public buffer(geom:z3d.Geometry = null):void {
+            var buffers = geom ? geom.data() : this.geometry.data();
+            for (var i = 0; i < buffers.length; ++i) {
+                this._program.update(buffers[i].attrib);
+            }
         }
 
         /* Render the content of this renderer */
         public render(step:number):void {
+
+            var gl = this._context.gl;
 
             // Update state
             if (this.update) {
@@ -60,14 +56,16 @@ module z3d {
             }
 
             // Generate custom geometry if required
-            var camera = this._camera;
-            var geom = this._geom;
-            if (this._gen != null) {
-                geom = this._gen.process(this._geom);
+            var camera = this.camera;
+            var geom = this.geometry;
+            if (this.generator != null) {
+                geom = this.generator.process(this.geometry);
+                this.buffer(geom);
             }
-
-            // Activate the program
-            this._program.load();
+            else if (this._updated == false) {
+                this._updated = true;
+                this.buffer();
+            }
 
             // Load geometry arrays
             var buffers = geom.data();
@@ -82,6 +80,9 @@ module z3d {
                 var buffer = buffers[i];
                 this._program.buffer(buffer.attrib, buffer.data, buffer.mode);
             }
+
+            // Activate the program
+            this._program.load();
 
             // Clear & draw
             gl.clearColor(1.0, 1.0, 1.0, 1.0);

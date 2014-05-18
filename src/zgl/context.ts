@@ -67,8 +67,16 @@ module zgl {
         public run(action:any):void {
             if (!this._running) {
                 this._running = true;
-                var worker = () => {
-                    action();
+                var last:number = null;
+                var worker = (t:number) => {
+                    if (last == null) {
+                        action(0);
+                        last = t;
+                    }
+                    else {
+                        action(t - last);
+                        last = t;
+                    }
                     if (this._running) {
                         requestAnimationFrame(worker);
                     }
@@ -80,6 +88,15 @@ module zgl {
         /* Stop the animation handler */
         public stop():void {
             this._running = false;
+        }
+
+        /* Debuggering helper; trace the last zgl context and throw an error it errors */
+        public check():void {
+            var last = this.gl.getError();
+            if (last != this.gl.NO_ERROR) {
+                console.trace();
+                throw new Error('webgl state is not clean');
+            }
         }
     }
 

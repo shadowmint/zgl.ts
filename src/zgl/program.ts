@@ -125,7 +125,7 @@ module zgl {
         }
 
         /*
-         * Push the inner data into the gl buffer
+         * Push the inner data into the gl buffer.
          * Notice this is only required for per-vertex attributes; for uniform values there
          * is no need to invoke this; and if the mode is not specified it does nothing.
          */
@@ -134,8 +134,9 @@ module zgl {
                 throw new Error('Unable to buffer data for unknown attribute "' + attribute + '"');
             }
             var gl = this._glc.gl;
-            var buffer = this._bindings[attribute].buffer;
-            var mode = this._bindings[attribute].mode;
+            var attrib = this._bindings[attribute];
+            var buffer = attrib.buffer;
+            var mode = attrib.mode;
             if (mode != null) {
                 if (buffer.mem.buffer == null) {
                     this._createBuffer(buffer.mem);
@@ -171,6 +172,9 @@ module zgl {
 
                 // Get the attribute binding
                 var attrib = this._bindings[key];
+                if (attrib.buffer == null) {
+                    throw new Error('No buffer has been bound to attribute "' + key + '"');
+                }
 
                 // Get the location
                 switch(attrib.type) {
@@ -195,7 +199,6 @@ module zgl {
 
                 // Bind buffer; must be done every frame.
                 switch(attrib.type) {
-
                     case BufferType.UNIFORM_SAMPLER:
                         gl.activeTexture(gl.TEXTURE0);
                         gl.bindTexture(gl.TEXTURE_2D, attrib.buffer);

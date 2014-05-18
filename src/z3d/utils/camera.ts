@@ -9,22 +9,23 @@ module z3d {
 
         private _buffer:z3d.geom.Buffer[] = [];
 
-        private projection:zgl.Mat4;
+        public projection:zgl.Mat4;
 
-        private modelview:zgl.Mat4;
+        public modelview:zgl.Mat4;
 
-        constructor(a_proj:string, a_modelview:string) {
-            this.projection = new zgl.Mat4().perspective(45, 1, 0.1, 100);
+        constructor(u_proj:string, u_modelview:string) {
+            this.projection = new zgl.Mat4().perspective(45, 1, 0.1, 1000);
             this.modelview = new zgl.Mat4().unity();
-            this._buffer.push({attrib: a_proj, data: this.projection.vp(), mode: null});
-            this._buffer.push({attrib: a_modelview, data: this.modelview.vp(), mode: null});
+            this._buffer.push({attrib: u_proj, data: this.projection.vp(), mode: null});
+            this._buffer.push({attrib: u_modelview, data: this.modelview.vp(), mode: null});
         }
-
-        /* Return the Mat4 objects for the
 
         /* Look at position */
 
         /* Set camera position */
+        public position(x:number, y:number, z:number):void {
+            this.modelview.translate(-x, -y, -z);
+        }
 
         /* Set camera normal */
 
@@ -43,8 +44,6 @@ module z3d {
         /* Orbit left around target */
 
         /* Orbit right around target */
-
-        /* Push internal state into local camera matrix */
 
         public data():z3d.geom.Buffer[] {
             return this._buffer;

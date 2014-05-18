@@ -27,7 +27,6 @@ module zgl {
           var srcU8 = new Uint8Array(src.data, srcOffset, bytes);
           dstU8.set(srcU8);
         }
-
     }
 
     /* Minimal api we expect on typed arrays */
@@ -45,6 +44,9 @@ module zgl {
         /* Size of each element in this view */
         public block:number;
 
+        /* Number of elements in this buffer */
+        public length:number;
+
         /* The actual memory block */
         public mem:Mem;
 
@@ -54,10 +56,11 @@ module zgl {
          * @param data The data block to use for this.
          * @param offset The offset into the data block to use for this.
          */
-        constructor(T:any, data:Mem, offset:number = 0) {
+        constructor(T:any, data:Mem, length:number, offset:number = 0) {
             this.block = T['BYTES_PER_ELEMENT'];
             this.mem = data;
-            this.data = this._factory(T, offset);
+            this.data = this._factory(T, length, offset);
+            this.length = length;
         }
 
         /* Returns as an array for debugging or whatever */
@@ -75,10 +78,14 @@ module zgl {
          * NB. that these are binary extensions, so using constructor.apply()
          * on a new object doesn't work; you have to manually check for types.
         * */
-        private _factory(type:any, offset:number):T {
+        private _factory(type:any, length:number, offset:number):T {
+            var max = this.mem.size / this.block;
+            if (length > max) {
+                throw Error('Invalid length ' + length + ' when memory block is only ' + max + ' long');
+            }
             switch(type) {
                 case Float32Array:
-                    var rtn:any = new Float32Array(this.mem.data, this.block * offset, this.mem.size / this.block);
+                    var rtn:any = new Float32Array(this.mem.data, this.block * offset, length);
                     return <T> rtn;
             }
             throw new Error('Invalid type: ' + type);
@@ -88,7 +95,7 @@ module zgl {
         public static factory(length:number):Buffer<Float32Array> {
             var size = Float32Array['BYTES_PER_ELEMENT'] * length;
             var mem = new Mem(size);
-            return new Buffer<Float32Array>(Float32Array, mem, 0);
+            return new Buffer<Float32Array>(Float32Array, mem, length, 0);
         }
 
         /*
@@ -104,6 +111,9 @@ module zgl {
 
         /* Set values from an array of the correct type */
         public set(data:any[]):Buffer<T> {
+            if (data.length != this.length) {
+                throw Error('Invalid set length ' + data.length + ' != buffer size ' + this.length);
+            }
             this.data.set(data);
             return this;
         }
