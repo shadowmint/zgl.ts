@@ -1,0 +1,133 @@
+<head>
+    <script src="../dist/z3d.js"></script>
+    <script src="demo.js"></script>
+    <style> 
+      canvas { width: 300px; height: 300px; } 
+      img { width: 40px; height: 40px; }
+    </style>
+</head>
+<body>
+
+<img id='texture' src="texture.png"/> <br/>
+<canvas id="webgl" width="300px" height="300px"></canvas>
+
+<script id="2d-vertex-shader" type="x-shader/x-vertex">
+  attribute vec3 a_pos;
+  attribute vec4 a_color;
+  attribute vec2 a_uv;
+
+  uniform mat4 u_proj;
+  uniform mat4 u_model;
+  uniform float u_time_offset;
+
+  varying vec4 v_color;
+  varying float v_time_offset;
+  varying vec2 v_uv;
+
+  void main(void) {
+    gl_Position = u_proj * u_model * vec4(a_pos, 1.0);
+    v_color = a_color;
+    v_time_offset = u_time_offset;
+    v_uv = a_uv;
+  }
+</script>
+
+<script id="2d-fragment-shader" type="x-shader/x-fragment">
+  precision mediump float;
+  uniform sampler2D u_sampler;
+  varying vec4 v_color;
+  varying float v_time_offset;
+  varying vec2 v_uv;
+
+  void main() {
+    float r = sin(v_time_offset + gl_FragCoord[0] / 100.0);
+    float g = sin(v_time_offset + gl_FragCoord[1] / 100.0);
+    float b = 1.0;
+    vec4 t = texture2D(u_sampler, vec2(v_uv.s, v_uv.t));
+    r = r * 0.2 + t[0] * 0.8;
+    g = g * 0.2 + t[1] * 0.8;
+    b = b * 0.2 + t[2] * 0.8;
+    gl_FragColor = vec4(r,g,b,1.0);
+  }
+</script>
+
+<script>
+  (function() {
+    var glc;
+    try {
+        // Load webgl context
+        try {
+            glc = zgl.context('webgl');
+            glc.viewport();
+        }
+        catch(e) {
+            console.log('No webgl');
+            return;
+        }
+
+        // Setup shader
+        var renderer = new z3d.Render(glc);
+        var time_offset = zgl.Buffer.factory(1);
+        renderer.program = function(glc) {
+            var gl = glc.gl;
+
+            var vertexShader = zgl.Shader.fromScript("2d-vertex-shader");
+            var fragmentShader = zgl.Shader.fromScript("2d-fragment-shader");
+            var program = new zgl.Program(glc, {vertex: vertexShader, fragment: fragmentShader});
+
+            // Bind shader attributes
+            program.bind('a_pos', zgl.BufferType.VERTEX_FLOAT3);
+            program.bind('a_color', zgl.BufferType.VERTEX_FLOAT4);
+            program.bind('a_uv', zgl.BufferType.VERTEX_FLOAT2);
+            program.bind('u_proj', zgl.BufferType.UNIFORM_MAT4);
+            program.bind('u_model', zgl.BufferType.UNIFORM_MAT4);
+            program.bind('u_sampler', zgl.BufferType.UNIFORM_SAMPLER);
+
+            // Timer is not generated from the geom source
+            program.bind('u_time_offset', zgl.BufferType.UNIFORM_FLOAT);
+            program.buffer('u_time_offset', time_offset);
+            time_offset.data[0] = 0.0;
+
+            // Turn depth testing on
+            gl.enable(gl.DEPTH_TEST);
+            gl.depthFunc(gl.LESS);
+
+            return program;
+        };
+
+        // Add a camera
+        renderer.camera = new z3d.Camera('u_proj', 'u_model');
+        renderer.camera.position(0, 0, 5);
+
+        // Add some geometry
+        var texture = document.getElementById('texture');
+        renderer.geometry = new z3d.geom.Cube({
+            a_vertex: 'a_pos',
+            a_uv: 'a_uv',
+            a_color: 'a_color',
+            u_sampler: 'u_sampler',
+            texture: texture,
+            size: [1.0, 1.0, 1.0],
+            position: [0.0, 0.0, 0.0]
+        }).compile(glc);
+        glc.check();
+
+        // Updater
+        var timer = 0;
+        renderer.update = function(step) {
+            timer += step;
+            time_offset.data[0] = timer * 0.001;
+            renderer.camera.modelview.unity().rotateX(timer * 0.001).rotateZ(timer * 0.001).translate(0, 0, -4);
+        };
+
+        // draw
+        glc.run(function(step) {
+            renderer.render(step);
+        });
+    }
+    catch (e) {
+        console.log(e);
+    }
+  })();
+</script>
+</body>
