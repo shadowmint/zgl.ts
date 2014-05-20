@@ -2,6 +2,7 @@
 module z3d {
     export module geom {
 
+        /* Configuration for cube */
         export interface CubeConfig {
             a_vertex:string;
             a_color:string;
@@ -12,53 +13,74 @@ module z3d {
             position:number[];
         }
 
-        export class Cube implements z3d.Geometry {
+        /* A basic cube geometry */
+        export class Cube extends Base implements z3d.Geometry {
 
+            /* Basic geom config */
             public offset:number;
             public size:number;
             public mode:any;
 
-            private _buffer:z3d.geom.Buffer[] = [];
+            /* The gl texture record for this geometry */
+            public texture:any;
 
+            /* Internal gl arrays */
             private _uv:zgl.Buffer<Float32Array>;
             private _vertex:zgl.Buffer<Float32Array>;
             private _color:zgl.Buffer<Float32Array>;
-            private _texture:any;
 
-            private _config:CubeConfig;
+            /* Cached copy of the config */
+            public config:CubeConfig;
 
             constructor(config:CubeConfig) {
-                this._config = config;
+                super();
+                this.config = config;
             }
 
             /* Compile this cube from it's config */
-            public compile(glc:zgl.Context):Cube {
-                var gl = glc.gl;
-                if (this._buffer.length == 0) {
+            public compile(glc:zgl.Context):any {
 
-                    // Setup
-                    this.offset = 0;
-                    this.size = 6 * 6;
-                    this.mode = gl.TRIANGLES;
+                // Setup
+                var gl = glc.gl;
+                this.offset = 0;
+                this.size = 6 * 6;
+                this.mode = gl.TRIANGLES;
+
+                // If no buffers have been provided, allocate new ones
+                if (this._buffers == null) {
+                    this._buffers = [
+                        zgl.Buffer.factory(this.size * 4),
+                        zgl.Buffer.factory(this.size * 3),
+                        zgl.Buffer.factory(this.size * 2)
+                    ];
+                }
+
+                // If we're rebuilding, rebuild
+                if (this._rebuild) {
+                    this._rebuild = false;
+
+                    // Arrays
+                    this._color = this._buffers[0];
+                    this._vertex = this._buffers[1];
+                    this._uv = this._buffers[2];
 
                     // Bind texture
-                    this._texture = gl.createTexture();
-                    gl.bindTexture(gl.TEXTURE_2D, this._texture);
-                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this._config.texture);
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-                    gl.bindTexture(gl.TEXTURE_2D, null);
+                    if (this.texture == null) {
+                        this.texture = gl.createTexture();
+                        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+                        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.config.texture);
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+                        gl.bindTexture(gl.TEXTURE_2D, null);
+                    }
 
                     // Assign buffers
-                    this._color = zgl.Buffer.factory(this.size * 4);
-                    this._vertex = zgl.Buffer.factory(this.size * 3);
-                    this._uv = zgl.Buffer.factory(this.size * 2);
-                    this._buffer.push({attrib: this._config.a_color, data: this._color, mode: glc.gl.STATIC_DRAW});
-                    this._buffer.push({attrib: this._config.a_vertex, data: this._vertex, mode: glc.gl.STATIC_DRAW});
-                    this._buffer.push({attrib: this._config.a_uv, data: this._uv, mode: glc.gl.STATIC_DRAW});
-                    this._buffer.push({attrib: this._config.u_sampler, data: this._texture, mode: null});
+                    this._buffer.push({attrib: this.config.a_color, data: this._color, mode: glc.gl.STATIC_DRAW});
+                    this._buffer.push({attrib: this.config.a_vertex, data: this._vertex, mode: glc.gl.STATIC_DRAW});
+                    this._buffer.push({attrib: this.config.a_uv, data: this._uv, mode: glc.gl.STATIC_DRAW});
+                    this._buffer.push({attrib: this.config.u_sampler, data: this.texture, mode: null});
 
-                    // Build UV's and colors
+                    // Build colors
                     this._color.set([
                         1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                         1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
@@ -67,24 +89,26 @@ module z3d {
                         1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                         1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0
                     ]);
+
+                    // Build uvs
                     this._uv.set([
-                        1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0,
-                        1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0,
-                        1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0,
-                        1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0,
-                        1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0,
-                        1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0
+                        1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
+                        1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
+                        1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
+                        1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
+                        1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
+                        1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0
                     ]);
 
                     // Rebuild the vertex data
-                    var FBL = [this._config.position[0] + this._config.size[0] * -0.5, this._config.position[1] + this._config.size[1] * -0.5, this._config.position[2] + this._config.size[2] * -0.5];
-                    var FBR = [this._config.position[0] + this._config.size[0] *  0.5, this._config.position[1] + this._config.size[1] * -0.5, this._config.position[2] + this._config.size[2] * -0.5];
-                    var FTL = [this._config.position[0] + this._config.size[0] * -0.5, this._config.position[1] + this._config.size[1] *  0.5, this._config.position[2] + this._config.size[2] * -0.5];
-                    var FTR = [this._config.position[0] + this._config.size[0] *  0.5, this._config.position[1] + this._config.size[1] *  0.5, this._config.position[2] + this._config.size[2] * -0.5];
-                    var BBL = [this._config.position[0] + this._config.size[0] * -0.5, this._config.position[1] + this._config.size[1] * -0.5, this._config.position[2] + this._config.size[2] *  0.5];
-                    var BBR = [this._config.position[0] + this._config.size[0] *  0.5, this._config.position[1] + this._config.size[1] * -0.5, this._config.position[2] + this._config.size[2] *  0.5];
-                    var BTL = [this._config.position[0] + this._config.size[0] * -0.5, this._config.position[1] + this._config.size[1] *  0.5, this._config.position[2] + this._config.size[2] *  0.5];
-                    var BTR = [this._config.position[0] + this._config.size[0] *  0.5, this._config.position[1] + this._config.size[1] *  0.5, this._config.position[2] + this._config.size[2] *  0.5];
+                    var FBL = [this.config.position[0] + this.config.size[0] * -0.5, this.config.position[1] + this.config.size[1] * -0.5, this.config.position[2] + this.config.size[2] * -0.5];
+                    var FBR = [this.config.position[0] + this.config.size[0] *  0.5, this.config.position[1] + this.config.size[1] * -0.5, this.config.position[2] + this.config.size[2] * -0.5];
+                    var FTL = [this.config.position[0] + this.config.size[0] * -0.5, this.config.position[1] + this.config.size[1] *  0.5, this.config.position[2] + this.config.size[2] * -0.5];
+                    var FTR = [this.config.position[0] + this.config.size[0] *  0.5, this.config.position[1] + this.config.size[1] *  0.5, this.config.position[2] + this.config.size[2] * -0.5];
+                    var BBL = [this.config.position[0] + this.config.size[0] * -0.5, this.config.position[1] + this.config.size[1] * -0.5, this.config.position[2] + this.config.size[2] *  0.5];
+                    var BBR = [this.config.position[0] + this.config.size[0] *  0.5, this.config.position[1] + this.config.size[1] * -0.5, this.config.position[2] + this.config.size[2] *  0.5];
+                    var BTL = [this.config.position[0] + this.config.size[0] * -0.5, this.config.position[1] + this.config.size[1] *  0.5, this.config.position[2] + this.config.size[2] *  0.5];
+                    var BTR = [this.config.position[0] + this.config.size[0] *  0.5, this.config.position[1] + this.config.size[1] *  0.5, this.config.position[2] + this.config.size[2] *  0.5];
                     this._vertex.set(this._combine(
                         FBL, FBR, FTL, // Front
                         FTL, FBR, FTR,
@@ -109,10 +133,6 @@ module z3d {
                     rtn = rtn.concat(numbers[i]);
                 }
                 return rtn;
-            }
-
-            public data():z3d.geom.Buffer[] {
-                return this._buffer;
             }
         }
     }
