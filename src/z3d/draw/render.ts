@@ -11,7 +11,6 @@ module z3d {
 
         /* Geometry source */
         public geometry:z3d.Geometry;
-        public generator:z3d.geom.Generator;
         private _updated:boolean = false;
 
         /* Camera to use */
@@ -58,11 +57,7 @@ module z3d {
             // Generate custom geometry if required
             var camera = this.camera;
             var geom = this.geometry;
-            if (this.generator != null) {
-                geom = this.generator.process(this.geometry);
-                this.buffer(geom);
-            }
-            else if (this._updated == false) {
+            if (this._updated == false) {
                 this._updated = true;
                 this.buffer();
             }
