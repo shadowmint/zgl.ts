@@ -91,14 +91,18 @@ module z3d {
                     ]);
 
                     // Build uvs
-                    this._uv.set([
-                        1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
-                        1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
-                        1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
-                        1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
-                        1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
-                        1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0
-                    ]);
+                    var BL = [0.0, 0.0];
+                    var BR = [1.0, 0.0];
+                    var TL = [0.0, 1.0];
+                    var TR = [1.0, 1.0];
+                    this._uv.set(this._combine(
+                        BL, BR, TL, TL, BR, TR,
+                        BL, BR, TL, TL, BR, TR,
+                        BL, BR, TL, TL, BR, TR,
+                        BL, BR, TL, TL, BR, TR,
+                        BL, BR, TL, TL, BR, TR,
+                        BL, BR, TL, TL, BR, TR
+                    ));
 
                     // Rebuild the vertex data
                     var FBL = [this.config.position[0] + this.config.size[0] * -0.5, this.config.position[1] + this.config.size[1] * -0.5, this.config.position[2] + this.config.size[2] * -0.5];
@@ -110,18 +114,12 @@ module z3d {
                     var BTL = [this.config.position[0] + this.config.size[0] * -0.5, this.config.position[1] + this.config.size[1] *  0.5, this.config.position[2] + this.config.size[2] *  0.5];
                     var BTR = [this.config.position[0] + this.config.size[0] *  0.5, this.config.position[1] + this.config.size[1] *  0.5, this.config.position[2] + this.config.size[2] *  0.5];
                     this._vertex.set(this._combine(
-                        FBL, FBR, FTL, // Front
-                        FTL, FBR, FTR,
-                        BBL, FBL, FTL,
-                        BBL, FTL, BTL,
-                        BBR, BBL, BTL,
-                        BBR, BTL, BTR,
-                        FBR, BBR, FTR,
-                        BBR, FTR, BTR,
-                        FTL, FTR, BTL,
-                        FTR, BTL, BTR,
-                        FBL, FBR, BBL,
-                        FBR, BBL, BBR
+                        FBL, FBR, FTL, FTL, FBR, FTR,
+                        FBL, BBL, FTL, FTL, BBL, BTL,
+                        BBL, BBR, BTL, BTL, BBR, BTR,
+                        FBR, BBR, FTR, FTR, BBR, BTR,
+                        FTL, FTR, BTL, BTL, FTR, BTR,
+                        FBL, FBR, BBL, BBL, FBR, BBR
                     ));
                 }
                 return this;
