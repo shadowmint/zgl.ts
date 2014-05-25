@@ -8,7 +8,7 @@ module z3d {
             public points:Point[] = null;
 
             /* Faces for this cube */
-            public faces:Face[] = null;
+            public _faces:Face[] = null;
 
             /* Position for this cube */
             public pos:number[] = [0.0, 0.0, 0.0];
@@ -39,6 +39,11 @@ module z3d {
                 this.points[15].pos = [pos[0] + size[0] * 0.5, pos[1] + size[1] * -0.5, pos[2] + size[2] * 0.5];
             }
 
+            /* Return all the faces */
+            public faces():Face[] {
+                return this._faces;
+            }
+
             /* Create buffers */
             private _buffer():void {
                 if (this.points == null) {
@@ -63,7 +68,7 @@ module z3d {
                         { pos: [-1.0, -1.0, 1.0], color: [1.0, 1.0, 1.0, 1.0], uv: [1.0, 0.0] }, // BBL
                         { pos: [ 1.0, -1.0, 1.0], color: [1.0, 1.0, 1.0, 1.0], uv: [1.0, 1.0] },  // BBR
                     ];
-                    this.faces = [
+                    this._faces = [
                         // Sides
                         { normal: { pos: [ 0.0, 0.0, 1.0] }, points: [ this.points[0], this.points[1], this.points[4], this.points[5]]}, // F
                         { normal: { pos: [ 0.0, 0.0, -1.0 ]}, points: [ this.points[2], this.points[3], this.points[6], this.points[7]]}, // B

@@ -20,7 +20,7 @@ module z3d {
 
         /* Any collection of faces */
         export interface Mesh {
-            faces:Face[];
+            faces():Face[];
         }
 
         /* A set of points, derived from a set of faces as a single array */
@@ -39,8 +39,9 @@ module z3d {
             var color:number[] = [];
             var uv:number[] = [];
 
-            for (var i = 0; i < mesh.faces.length; ++i) {
-                var face = mesh.faces[i];
+            var faces = mesh.faces();
+            for (var i = 0; i < faces.length; ++i) {
+                var face = faces[i];
 
                 vertex.push.apply(vertex, face.points[0].pos);
                 vertex.push.apply(vertex, face.points[1].pos);
