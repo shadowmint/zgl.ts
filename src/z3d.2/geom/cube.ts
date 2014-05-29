@@ -41,6 +41,7 @@ module z3d {
 
             /* Return all the faces */
             public faces():Face[] {
+                this.compile();
                 return this._faces;
             }
 

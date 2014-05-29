@@ -3,17 +3,17 @@ module z3d {
     export module proc {
 
         /* Configuration for cube */
-        export interface CubeConfig {
+        export interface MeshConfig {
             a_vertex:string;
             a_color:string;
             a_uv:string;
             u_sampler:string;
             texture:HTMLImageElement;
-            cube:z3d.geom.Cube;
+            geom:z3d.geom.Mesh;
         }
 
-        /* A basic cube geometry for a shader with color, vertex, uv and sampler attributes */
-        export class Cube extends z3d.GeometryBase implements z3d.Geometry {
+        /* A basic mesh geometry for a shader with color, vertex, uv and sampler attributes */
+        export class Mesh extends z3d.GeometryBase implements z3d.Geometry {
 
             /* Basic geom config */
             public offset:number;
@@ -29,9 +29,9 @@ module z3d {
             private _color:zgl.Buffer<Float32Array>;
 
             /* Cached copy of the config */
-            public config:CubeConfig;
+            public config:MeshConfig;
 
-            constructor(config:CubeConfig) {
+            constructor(config:MeshConfig) {
                 super();
                 this.config = config;
             }
@@ -41,8 +41,9 @@ module z3d {
 
                 // Setup
                 var gl = glc.gl;
+                var faces = this.config.geom.faces();
                 this.offset = 0;
-                this.size = 6 * 6;
+                this.size = faces.length * 6;
                 this.mode = gl.TRIANGLES;
 
                 // If no buffers have been provided, allocate new ones
@@ -80,7 +81,7 @@ module z3d {
                     this._buffer.push({attrib: this.config.u_sampler, data: this.texture, mode: null});
 
                     // Buid element arrays
-                    var points = z3d.geom.export_mesh(this.config.cube);
+                    var points = z3d.geom.export_mesh(faces);
 
                     // Build buffers
                     this._color.set(points.color);

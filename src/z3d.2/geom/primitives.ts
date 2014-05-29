@@ -32,14 +32,13 @@ module z3d {
         }
 
         /* Export a set of faces as a triangle mesh */
-        export function export_mesh(mesh:Mesh):Points {
+        export function export_mesh(faces:Face[]):Points {
             // TODO: Normals should go in here too
 
             var vertex:number[] = [];
             var color:number[] = [];
             var uv:number[] = [];
 
-            var faces = mesh.faces();
             for (var i = 0; i < faces.length; ++i) {
                 var face = faces[i];
 
@@ -64,7 +63,7 @@ module z3d {
                 color.push.apply(color, face.points[2].color);
                 color.push.apply(color, face.points[3].color);
             }
-            return { vertex: vertex, uv: uv, color: color, count: mesh.faces.length * 6 };
+            return { vertex: vertex, uv: uv, color: color, count: faces.length * 6 };
         }
     }
 }
