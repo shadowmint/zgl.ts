@@ -17,7 +17,7 @@ module z3d {
             public size:number[] = [1.0, 1.0, 1.0];
 
             /* Rebuild the faces for this cube */
-            public compile():void {
+            public compile():Cube {
                 this._buffer();
                 var pos = this.pos;
                 var size = this.size;
@@ -37,6 +37,7 @@ module z3d {
                 this.points[13].pos = [pos[0] + size[0] * 0.5, pos[1] + size[1] * -0.5, pos[2] + size[2] * -0.5];
                 this.points[14].pos = [pos[0] + size[0] * -0.5, pos[1] + size[1] * -0.5, pos[2] + size[2] * 0.5];
                 this.points[15].pos = [pos[0] + size[0] * 0.5, pos[1] + size[1] * -0.5, pos[2] + size[2] * 0.5];
+                return this;
             }
 
             /* Return all the faces */

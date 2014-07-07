@@ -37,7 +37,7 @@ module z3d {
             }
 
             /* Compile this cube from it's config */
-            public compile(glc:zgl.Context):any {
+            public compile(glc:zgl.Context):GeometryBase {
 
                 // Setup
                 var gl = glc.gl;

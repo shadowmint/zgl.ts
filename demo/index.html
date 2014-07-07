@@ -62,11 +62,13 @@
         }
         catch(e) {
             console.log('No webgl');
+            console.log(e);
+            console.log('Hone');
             return;
         }
 
         // Setup shader
-        var renderer = new z3d.Render(glc);
+        var renderer = new z3d.Renderer(glc);
         var time_offset = zgl.Buffer.factory(1);
         renderer.program = function(glc) {
             var gl = glc.gl;
@@ -97,7 +99,7 @@
 
         // Add a camera
         renderer.camera = new z3d.Camera('u_proj', 'u_model');
-        renderer.camera.position(0, 0, 5);
+        renderer.camera.position(0, 0, -5);
 
         // Add some geometry
         var texture = document.getElementById('texture');
