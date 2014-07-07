@@ -33,3 +33,4 @@ bin/*.js
 bin/*.d.ts
 bin/*.js.map
 tscommand.tmp.txt
+demo/libs

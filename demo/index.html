@@ -1,8 +1,15 @@
 <head>
     <script src="../dist/z3d.js"></script>
     <style>
-      canvas { width: 300px; height: 300px; }
-      img { width: 40px; height: 40px; }
+        canvas {
+            width: 300px;
+            height: 300px;
+        }
+
+        img {
+            width: 40px;
+            height: 40px;
+        }
     </style>
 </head>
 <body>
@@ -50,85 +57,90 @@
   }
 </script>
 
+<script src="./libs/requirejs/require.js"></script>
 <script>
-  (function() {
-    var glc;
-    try {
-        // Load webgl context
-        try {
-            glc = zgl.context('webgl');
-            glc.viewport();
-        }
-        catch(e) {
-            console.log('No webgl');
-            console.log(e);
-            console.log('Hone');
-            return;
-        }
+    require(['../build/zgl/zgl/context'], function (zgl) {
+        console.log('Api');
+        console.log(zgl);
+        (function () {
+            var glc;
+            try {
+                // Load webgl context
+                try {
+                    glc = zgl.context('webgl');
+                    glc.viewport();
+                }
+                catch (e) {
+                    console.log('No webgl');
+                    console.log(e);
+                    console.log('Hone');
+                    return;
+                }
 
-        // Setup shader
-        var renderer = new z3d.Renderer(glc);
-        var time_offset = zgl.Buffer.factory(1);
-        renderer.program = function(glc) {
-            var gl = glc.gl;
+                // Setup shader
+                var renderer = new z3d.Renderer(glc);
+                var time_offset = zgl.Buffer.factory(1);
+                renderer.program = function (glc) {
+                    var gl = glc.gl;
 
-            var vertexShader = zgl.Shader.fromScript("2d-vertex-shader");
-            var fragmentShader = zgl.Shader.fromScript("2d-fragment-shader");
-            var program = new zgl.Program(glc, {vertex: vertexShader, fragment: fragmentShader});
+                    var vertexShader = zgl.Shader.fromScript("2d-vertex-shader");
+                    var fragmentShader = zgl.Shader.fromScript("2d-fragment-shader");
+                    var program = new zgl.Program(glc, {vertex: vertexShader, fragment: fragmentShader});
 
-            // Bind shader attributes
-            program.bind('a_pos', zgl.BufferType.VERTEX_FLOAT3);
-            program.bind('a_color', zgl.BufferType.VERTEX_FLOAT4);
-            program.bind('a_uv', zgl.BufferType.VERTEX_FLOAT2);
-            program.bind('u_proj', zgl.BufferType.UNIFORM_MAT4);
-            program.bind('u_model', zgl.BufferType.UNIFORM_MAT4);
-            program.bind('u_sampler', zgl.BufferType.UNIFORM_SAMPLER);
+                    // Bind shader attributes
+                    program.bind('a_pos', zgl.BufferType.VERTEX_FLOAT3);
+                    program.bind('a_color', zgl.BufferType.VERTEX_FLOAT4);
+                    program.bind('a_uv', zgl.BufferType.VERTEX_FLOAT2);
+                    program.bind('u_proj', zgl.BufferType.UNIFORM_MAT4);
+                    program.bind('u_model', zgl.BufferType.UNIFORM_MAT4);
+                    program.bind('u_sampler', zgl.BufferType.UNIFORM_SAMPLER);
 
-            // Timer is not generated from the geom source
-            program.bind('u_time_offset', zgl.BufferType.UNIFORM_FLOAT);
-            program.buffer('u_time_offset', time_offset);
-            time_offset.data[0] = 0.0;
+                    // Timer is not generated from the geom source
+                    program.bind('u_time_offset', zgl.BufferType.UNIFORM_FLOAT);
+                    program.buffer('u_time_offset', time_offset);
+                    time_offset.data[0] = 0.0;
 
-            // Turn depth testing on
-            gl.enable(gl.DEPTH_TEST);
-            gl.depthFunc(gl.LESS);
+                    // Turn depth testing on
+                    gl.enable(gl.DEPTH_TEST);
+                    gl.depthFunc(gl.LESS);
 
-            return program;
-        };
+                    return program;
+                };
 
-        // Add a camera
-        renderer.camera = new z3d.Camera('u_proj', 'u_model');
-        renderer.camera.position(0, 0, -5);
+                // Add a camera
+                renderer.camera = new z3d.Camera('u_proj', 'u_model');
+                renderer.camera.position(0, 0, -5);
 
-        // Add some geometry
-        var texture = document.getElementById('texture');
-        renderer.geometry = new z3d.geom.Cube({
-            a_vertex: 'a_pos',
-            a_uv: 'a_uv',
-            a_color: 'a_color',
-            u_sampler: 'u_sampler',
-            texture: texture,
-            size: [1.0, 1.0, 1.0],
-            position: [0.0, 0.0, 0.0]
-        }).compile(glc);
-        glc.check();
+                // Add some geometry
+                var texture = document.getElementById('texture');
+                renderer.geometry = new z3d.geom.Cube({
+                    a_vertex: 'a_pos',
+                    a_uv: 'a_uv',
+                    a_color: 'a_color',
+                    u_sampler: 'u_sampler',
+                    texture: texture,
+                    size: [1.0, 1.0, 1.0],
+                    position: [0.0, 0.0, 0.0]
+                }).compile(glc);
+                glc.check();
 
-        // Updater
-        var timer = 0;
-        renderer.update = function(step) {
-            timer += step;
-            time_offset.data[0] = timer * 0.001;
-            renderer.camera.modelview.unity().rotateX(timer * 0.001).rotateZ(timer * 0.001).translate(0, 0, -4);
-        };
+                // Updater
+                var timer = 0;
+                renderer.update = function (step) {
+                    timer += step;
+                    time_offset.data[0] = timer * 0.001;
+                    renderer.camera.modelview.unity().rotateX(timer * 0.001).rotateZ(timer * 0.001).translate(0, 0, -4);
+                };
 
-        // draw
-        glc.run(function(step) {
-            renderer.render(step);
-        });
-    }
-    catch (e) {
-        console.log(e);
-    }
-  })();
+                // draw
+                glc.run(function (step) {
+                    renderer.render(step);
+                });
+            }
+            catch (e) {
+                console.log(e);
+            }
+        })();
+    });
 </script>
 </body>
