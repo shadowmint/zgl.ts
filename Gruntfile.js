@@ -34,30 +34,18 @@ module.exports = function (grunt) {
         },
         nodeunit: {
             zgl: [ '<%= path.build %>/zgl/**/*_tests.js' ]
-        }
-        // TODO: Browserify
-    });
-    ext.registerTask('zgl', ['typescript:zgl', 'nodeunit:zgl']);
-
-    // z3d
-    /*configure({
-        ts: {
-            z3d: {
-                src: ['src/z3d/__init__.ts'],
-                out: 'dist/z3d.js',
-                options: {
-                    module: 'amd',
-                    target: 'es3',
-                    sourceMaps: true,
-                    declaration: true,
-                    removeComments: false
+        },
+        bowserify: {
+            zgl: {
+                files: {
+                    'dist/zgl.js': [ '<%= path.build %>/zgl/__init__.ts' ]
                 }
             }
-        }
-    });*/
 
-    // Load combined config
-    //grunt.registerTask('_z3d', ['ts:z3d']);
+        }
+    });
+    ext.registerTask('zgl', ['typescript:zgl', 'nodeunit:zgl']);
+    ext.registerTask('zgl_build', ['zgl', 'bowserify:zgl']);
 
     // External tasks
     ext.initConfig(grunt);
