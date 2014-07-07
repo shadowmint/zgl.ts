@@ -25,8 +25,8 @@ module.exports = function (grunt) {
                 options: {
                     module: 'commonjs',
                     target: 'es3',
-                    basePath: '<%= path.src %>/zgl',
-                    sourceMap: true,
+                    basePath: '<%= path.src %>',
+                    sourceMap: false,
                     declaration: true,
                     comments: true
                 }
@@ -35,19 +35,53 @@ module.exports = function (grunt) {
         nodeunit: {
             zgl: [ '<%= path.build %>/zgl/**/*_tests.js' ]
         },
-        bowserify: {
+        browserify: {
             zgl: {
                 files: {
-                    'dist/zgl.js': [ '<%= path.build %>/zgl/__init__.ts' ]
+                    'dist/zgl.js': [ '<%= path.build %>/zgl/**/*.js' ]
                 }
             }
 
         }
     });
     ext.registerTask('zgl', ['typescript:zgl', 'nodeunit:zgl']);
-    ext.registerTask('zgl_build', ['zgl', 'bowserify:zgl']);
+    ext.registerTask('zgl_build', ['zgl', 'browserify:zgl']);
+
+    // z3d
+    ext.configure({
+        typescript: {
+            z3d: {
+                src: ['<%= path.src %>/z3d/**/*.ts'],
+                dest: '<%= path.build %>/z3d',
+                options: {
+                    module: 'commonjs',
+                    target: 'es3',
+                    basePath: '<%= path.src %>',
+                    sourceMap: false,
+                    declaration: true,
+                    comments: true
+                }
+            }
+        },
+        nodeunit: {
+            z3d: [ '<%= path.build %>/z3d/**/*_tests.js' ]
+        },
+        browserify: {
+            z3d: {
+                files: {
+                    'dist/z3d.js': [ '<%= path.build %>/**/*.js' ]
+                }
+            }
+
+        }
+    });
+    ext.registerTask('z3d', ['typescript:z3d', 'nodeunit:z3d']);
+    ext.registerTask('z3d_build', ['z3d', 'browserify:z3d']);
+
+    // Common build tasks
+    ext.registerTask('build', ['zgl_build', 'z3d_build'])
 
     // External tasks
     ext.initConfig(grunt);
-    //grunt.registerTask('default', ['clean', '_zgl', '_z3d']);
+    grunt.registerTask('default', ['clean', 'build']);
 }
