@@ -34,8 +34,6 @@ export class Scene {
   public render(step:number):void {
     this._glc.check();
     var gl = this._glc.gl;
-    console.log(this._glc.gl);
-    console.log(this.background);
     gl.clearColor(this.background[0], this.background[1], this.background[2], this.background[3]);
     for (var i = 0; i < this.components.length; ++i) {
       this.components[i].render(step);

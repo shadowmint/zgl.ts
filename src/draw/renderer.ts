@@ -66,7 +66,6 @@ export class Renderer {
     // Render each geometry
     for (var i = 0; i < this.geometry.length; ++i) {
       var geom = this.geometry[i];
-      console.log('geom');
       if (geom.visible && geom.valid) {
         if (this._updated == false) {
           this._updated = true;
@@ -91,8 +90,6 @@ export class Renderer {
         this._program.load();
 
         // Clear & draw
-        console.log('Draw!');
-        console.log(geom);
         gl.drawArrays(geom.mode, geom.offset, geom.size);
       }
     }

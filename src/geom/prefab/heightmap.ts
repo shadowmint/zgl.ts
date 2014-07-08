@@ -1,56 +1,71 @@
-/*
 import p = require('../primitives');
-import gen = require('../gen');
+import geom = require('../geometry');
 import cube = require('./cube');
 
-xxx A array of points yy
-export class HeightMapConfig {
+/** Heightmap is a 2d block of cubes */
+export class Heightmap extends geom.Config {
 
-    xxx Cells wide yy
-    dx:number;
+    /** Cells wide */
+    public dx:number = 1;
 
-    xxx Cells high yy
-    dy:number;
+    /** Cells high */
+    public dy:number = 1;
 
-    xxx Heights for each cell yy
-    heights:number[];
+    /** Heights for each cell */
+    public heights:number[] = [];
 
-    xxx Cell types yy
-    types:number[];
+    /** Cell types */
+    public types:number[] = [];
 
-    xxx The top size of each cube yy
+    /** The top size of each cube */
     public block:number = 0.1;
 
-    xxx The Z-base for each cube yy
+    /** The Z-base for each cube */
     public base:number = 0;
 
-    xxx Position for the origin of this heightmap yy
+    /** Position for the origin of this heightmap */
     public pos:number[] = [0.0, 0.0, 0.0];
-    
-    xxx The size of the cubes yy
-    public size:number = 1.0;
+
+    /** The size of the cubes */
+    public size:number[] = [1.0, 1.0, 1.0];
+
+    /** Export cube geometry */
+    public constructor(params:any) {
+        super();
+        for (var key in params) {
+            if (this[key] || (this[key] === null)) {
+                this[key] = params[key];
+            }
+        }
+        this.mesh = new HeightmapMesh(this);
+    }
 }
 
-xxx A cube with a uniform texture on each face yy
-export class HeightMap extends gen.Gen {
+/** A cube with a uniform texture on each face */
+export class HeightmapMesh implements p.Mesh {
 
-    xxx Source data yy
-    public config:HeightMapConfig;
+    /** Source data */
+    public config:Heightmap;
 
-    xxx The set of cubes that are generated for each point in the active zone yy
+    /** The set of cubes that are generated for each point in the active zone */
     private _cubes:cube.Cube[] = null;
 
-    xxx Set of faces yy
+    /** Set of faces */
     private _faces:p.Face[] = null;
 
-    xxx Return all the faces from all cubes yy
+    /** Create mesh and record instance */
+      public constructor(config:Heightmap) {
+          this.config = config;
+      }
+
+    /** Return all the faces from all cubes */
     public faces():p.Face[] {
         this.compile();
         return this._faces;
     }
 
-    xxx Rebuild the faces for this cube yy
-    public compile():HeightMap {
+    /** Rebuild the faces for this cube */
+    public compile():void {
         var c = this.config;
         if (this._faces == null) {
             this._faces = [];
@@ -63,15 +78,14 @@ export class HeightMap extends gen.Gen {
                             c.pos[1] - (c.dy / 2 * c.block) + (c.block * j),
                             c.pos[2] + size[2] / 2
                     ];
-                    var cube = new cube.Cube();
-                    cube.size = c.size;
-                    cube.pos = center;
-                    this._cubes.push(cube);
-                    this._faces.push.apply(this._faces, cube.faces());
+                    var c = new cube.Cube({
+                        size: size,
+                        pos: center
+                    });
+                    // this._cubes.push(c);
+                    // this._faces.push.apply(this._faces, c.faces());
                 }
             }
         }
-        return this;
     }
 }
-*/

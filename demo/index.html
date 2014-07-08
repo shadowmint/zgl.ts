@@ -18,7 +18,7 @@
 <canvas id="webgl" width="300px" height="300px"></canvas>
 
 <script id="2d-vertex-shader" type="x-shader/x-vertex">
-  attribute vec3 a_pos;
+  attribute vec3 a_vertex;
   attribute vec4 a_color;
   attribute vec2 a_uv;
 
@@ -31,7 +31,7 @@
   varying vec2 v_uv;
 
   void main(void) {
-    gl_Position = u_proj * u_model * vec4(a_pos, 1.0);
+    gl_Position = u_proj * u_model * vec4(a_vertex, 1.0);
     v_color = a_color;
     v_time_offset = u_time_offset;
     v_uv = a_uv;
@@ -64,9 +64,10 @@
         'build/draw/scene',
         'build/utils/buffer',
         'build/shader',
-        'build/geom/prefab/cube',
         'build/program',
-    ], function (c, scene, buffer, shader, cube, prog) {
+        'build/geom/prefab/cube',
+        'build/geom/prefab/heightmap'
+    ], function (c, scene, buffer, shader, prog, cube, hm) {
         var glc;
         try {
             // Load webgl context
@@ -95,7 +96,7 @@
                 var program = new prog.Program(glc, {vertex: vertexShader, fragment: fragmentShader});
 
                 // Bind shader attributes
-                program.bind('a_pos', prog.BufferType.VERTEX_FLOAT3);
+                program.bind('a_vertex', prog.BufferType.VERTEX_FLOAT3);
                 program.bind('a_color', prog.BufferType.VERTEX_FLOAT4);
                 program.bind('a_uv', prog.BufferType.VERTEX_FLOAT2);
                 program.bind('u_proj', prog.BufferType.UNIFORM_MAT4);
@@ -123,16 +124,33 @@
             // Add some geometry
             var texture = document.getElementById('texture');
             var cube = new cube.Cube({
-                a_vertex: 'a_pos',
-                a_uv: 'a_uv',
-                a_color: 'a_color',
-                u_sampler: 'u_sampler',
                 texture: texture,
                 size: [1.0, 1.0, 1.0],
                 position: [0.0, 0.0, 0.0]
             });
+            var map = new hm.Heightmap({
+                texture: texture,
+                position: [0.0, 0.0, 0.0],
+                dx: 5,
+                dy: 5,
+                heights: [
+                   0, 1, 2, 1, 0,
+                   1, 2, 2, 2, 1,
+                   2, 3, 5, 3, 2,
+                   1, 2, 3, 2, 1,
+                   0, 1, 2, 1, 0
+                ],
+                types: [
+                   0, 1, 2, 1, 0,
+                   1, 2, 2, 2, 1,
+                   2, 3, 5, 3, 2,
+                   1, 2, 3, 2, 1,
+                   0, 1, 2, 1, 0
+                ]
+            });
 
-            renderer.add(cube.compile(glc));
+            //renderer.add(cube.compile(glc));
+            renderer.add(map.compile(glc));
             glc.check();
 
             // Updater

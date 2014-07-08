@@ -2,7 +2,7 @@ import p = require('../primitives');
 import geom = require('../geometry');
 
 
-/** Config for this cube */
+/** It's a cube */
 export class Cube extends geom.Config {
     
   /** The distinct points that comprise this cube */
@@ -19,7 +19,6 @@ export class Cube extends geom.Config {
       super();
       for (var key in params) {
           if (this[key] || (this[key] === null)) {
-              console.log('Inherit: ' + key);
               this[key] = params[key];
           }
       }
