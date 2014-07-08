@@ -1,25 +1,25 @@
-/* A webgl context with some extra bits */
+/** A webgl context with some extra bits */
 export class Context {
 
-  /* Height of the canvas */
+  /** Height of the canvas */
   public height:number;
 
-  /* Width of the canvas */
+  /** Width of the canvas */
   public width:number;
 
-  /* The canvas object itself */
+  /** The canvas object itself */
   public canvas:HTMLCanvasElement;
 
-  /* The opengl content */
+  /** The opengl content */
   public gl:any;
 
-  /* Debugging? */
+  /** Debugging? */
   private _debug:boolean = false;
 
-  /* Running the runner utility */
+  /** Running the runner utility */
   private _running:boolean = false;
 
-  /*
+  /**
    * Create a new context from a canvas
    * NB. The canvas size is not the *style* size, it is given by:
    * <canvas id="webgl" width="300px" height="300px"></canvas>
@@ -48,19 +48,19 @@ export class Context {
     }
   }
 
-  /* Trace debugging errors to console; monkey patch to update */
+  /** Trace debugging errors to console; monkey patch to update */
   private trace(msg:string):void {
     if (window['console']) {
       window['console'].log(msg);
     }
   }
 
-  /* Set the viewport to the size of the canvas */
+  /** Set the viewport to the size of the canvas */
   public viewport():void {
     this.gl.viewport(0, 0, this.width, this.height);
   }
 
-  /* Run per-animation frame actions */
+  /** Run per-animation frame actions */
   public run(action:any):void {
     if (!this._running) {
       this._running = true;
@@ -82,12 +82,12 @@ export class Context {
     }
   }
 
-  /* Stop the animation handler */
+  /** Stop the animation handler */
   public stop():void {
     this._running = false;
   }
 
-  /* Debuggering helper; trace the last zgl context and throw an error it errors */
+  /** Debuggering helper; trace the last zgl context and throw an error it errors */
   public check():void {
     var last = this.gl.getError();
     if (last != this.gl.NO_ERROR) {

@@ -1,18 +1,18 @@
 import c = require('../context');
 
-/* A memory block of values */
+/** A memory block of values */
 export class Mem {
 
-  /* The GL buffer target, or any other native binding */
+  /** The GL buffer target, or any other native binding */
   public buffer:any = null;
 
-  /* A data block of memeory */
+  /** A data block of memeory */
   public data:ArrayBuffer;
 
-  /* Open gl context */
+  /** Open gl context */
   private _glc:c.Context;
 
-  /* Size of this memory block */
+  /** Size of this memory block */
   public size:number;
 
   constructor(size:number) {
@@ -20,7 +20,7 @@ export class Mem {
     this.size = size;
   }
 
-  /* Replace a section of the data in this data block */
+  /** Replace a section of the data in this data block */
   public memset(offset:number, src:Mem, srcOffset:number, bytes:number) {
     var dstU8 = new Uint8Array(this.data, offset, bytes);
     var srcU8 = new Uint8Array(src.data, srcOffset, bytes);
@@ -28,25 +28,25 @@ export class Mem {
   }
 }
 
-/* Minimal api we expect on typed arrays */
+/** Minimal api we expect on typed arrays */
 export interface TypedArray {
   set(data:any[]):void;
   length:number;
 }
 
-/* Vritual memory block point; A pointer to a section of a memory block */
+/** Vritual memory block point; A pointer to a section of a memory block */
 export class Buffer<T extends TypedArray> {
 
-  /* Data view only */
+  /** Data view only */
   public data:T;
 
-  /* Size of each element in this view */
+  /** Size of each element in this view */
   public block:number;
 
-  /* Number of elements in this buffer */
+  /** Number of elements in this buffer */
   public length:number;
 
-  /* The actual memory block */
+  /** The actual memory block */
   public mem:Mem;
 
   /*
@@ -62,7 +62,7 @@ export class Buffer<T extends TypedArray> {
     this.length = length;
   }
 
-  /* Returns as an array for debugging or whatever */
+  /** Returns as an array for debugging or whatever */
   public asArray():number[] {
     var rtn = [];
     for (var i = 0; i < this.data.length; ++i) {
@@ -90,13 +90,6 @@ export class Buffer<T extends TypedArray> {
     throw new Error('Invalid type: ' + type);
   }
 
-  /* Convenience function for a simple data element */
-  public static factory(length:number):Buffer<Float32Array> {
-    var size = Float32Array['BYTES_PER_ELEMENT'] * length;
-    var mem = new Mem(size);
-    return new Buffer<Float32Array>(Float32Array, mem, length, 0);
-  }
-
   /*
    * Replace a section of the data in this data block
    * @param offset The offset into this VP to set data from.
@@ -108,7 +101,7 @@ export class Buffer<T extends TypedArray> {
     this.mem.memset(offset * this.block, src.mem, srcOffset * this.block, items * this.block);
   }
 
-  /* Set values from an array of the correct type */
+  /** Set values from an array of the correct type */
   public set(data:any[]):Buffer<T> {
     if (data.length != this.length) {
       throw Error('Invalid set length ' + data.length + ' != buffer size ' + this.length);
@@ -116,4 +109,11 @@ export class Buffer<T extends TypedArray> {
     this.data.set(data);
     return this;
   }
+}
+
+/** Convenience function for a simple data element */
+export function factory(length:number):Buffer<Float32Array> {
+    var size = Float32Array['BYTES_PER_ELEMENT'] * length;
+    var mem = new Mem(size);
+    return new Buffer<Float32Array>(Float32Array, mem, length, 0);
 }

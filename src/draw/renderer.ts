@@ -1,35 +1,35 @@
-import c = require('../../zgl/context');
-import p = require('../../zgl/program');
+import c = require('../context');
+import p = require('../program');
 import g = require('../geom/geometry');
 import cam = require('../utils/camera');
 
-/* Shader program and renderable geometry set */
+/** Shader program and renderable geometry set */
 export class Renderer {
 
-  /* The GL context */
+  /** The GL context */
   private _context:c.Context;
 
-  /* The shader program */
+  /** The shader program */
   private _program:p.Program;
 
-  /* Geometry source */
+  /** Geometry source */
   public geometry:g.Geometry[] = [];
   private _updated:boolean = false;
 
-  /* Camera to use */
+  /** Camera to use */
   public camera:cam.Camera;
 
-  /* Load a shader and bind it as a program with buffers */
-  public program:{(glc:c.Context):p.Program} = null;
+  /** Load a shader and bind it as a program with buffers */
+  public program:{(glc:c.Context):p.Program};
 
-  /* Update to render before every render, if required */
-  public update:{(step:number):void} = null;
+  /** Update to render before every render, if required */
+  public update:{(step:number):void};
 
   public constructor(context:c.Context) {
     this._context = context;
   }
 
-  /* Push content into vertex buffers for the attributes in the geometry */
+  /** Push content into vertex buffers for the attributes in the geometry */
   private _buffer(geom:g.Geometry):void {
     var buffers = geom.data();
     for (var i = 0; i < buffers.length; ++i) {
@@ -37,12 +37,12 @@ export class Renderer {
     }
   }
 
-  /* A an item to the renderer geometry set */
+  /** A an item to the renderer geometry set */
   public add(geom:g.Geometry):void {
     this.geometry.push(geom);
   }
 
-  /* Render the content of this renderer */
+  /** Render the content of this renderer */
   public render(step:number):void {
 
     var gl = this._context.gl;
@@ -55,7 +55,7 @@ export class Renderer {
 
     // Load the program
     if (this._program == null) {
-      if (this.program == null) {
+      if (!this.program) {
         throw Error("Invalid shader program");
       }
       else {
@@ -66,6 +66,7 @@ export class Renderer {
     // Render each geometry
     for (var i = 0; i < this.geometry.length; ++i) {
       var geom = this.geometry[i];
+      console.log('geom');
       if (geom.visible && geom.valid) {
         if (this._updated == false) {
           this._updated = true;
@@ -90,6 +91,8 @@ export class Renderer {
         this._program.load();
 
         // Clear & draw
+        console.log('Draw!');
+        console.log(geom);
         gl.drawArrays(geom.mode, geom.offset, geom.size);
       }
     }

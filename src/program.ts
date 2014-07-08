@@ -1,14 +1,14 @@
 import c = require('context');
-import b = require('./math/block');
 import s = require('shader');
+import b = require('./utils/buffer');
 
-/* A fragment and vertex shader combo */
+/** A fragment and vertex shader combo */
 export interface Shaders {
   vertex:s.Shader;
   fragment:s.Shader;
 }
 
-/* Types of buffers that can be bound */
+/** Types of buffers that can be bound */
 export enum BufferType {
   UNIFORM_SAMPLER,
   UNIFORM_MAT4,
@@ -18,7 +18,7 @@ export enum BufferType {
   VERTEX_FLOAT4
 }
 
-/* The currently held config for a buffer binding */
+/** The currently held config for a buffer binding */
 interface BufferBinding {
   attribute:string;
   type:BufferType;
@@ -31,16 +31,16 @@ interface BufferBinding {
 /** A shader program */
 export class Program {
 
-  /* The actual shader program */
+  /** The actual shader program */
   public program:any = null;
 
-  /* The shaders used */
+  /** The shaders used */
   public shaders:Shaders;
 
-  /* Attribute binding */
+  /** Attribute binding */
   private _bindings:{[key:string]:BufferBinding} = {};
 
-  /* Keep a copy of the context to work with */
+  /** Keep a copy of the context to work with */
   private _glc:c.Context;
 
   /*
@@ -89,7 +89,7 @@ export class Program {
     this.shaders = this.shaders;
   }
 
-  /* Bind a buffer to an attribute for a shader */
+  /** Bind a buffer to an attribute for a shader */
   public bind(attribute:string, type:BufferType):void {
     if (this._bindings[attribute]) {
       throw new Error('Invalid attribute name "' + attribute + '" already in use');
@@ -104,7 +104,7 @@ export class Program {
     }
   }
 
-  /* Assign a buffer for this renderer */
+  /** Assign a buffer for this renderer */
   public buffer(attribute:string, buffer:b.Buffer<Float32Array>, mode:any = null):void {
     if (!this._bindings[attribute]) {
       throw new Error('Unable to buffer unknown attribute "' + attribute + '"');
@@ -115,7 +115,7 @@ export class Program {
     this.update(attribute);
   }
 
-  /* Convert this block into an opengl buffer */
+  /** Convert this block into an opengl buffer */
   private _createBuffer(mem:b.Mem):void {
     var gl = this._glc.gl;
     mem.buffer = gl.createBuffer();
@@ -149,7 +149,7 @@ export class Program {
     }
   }
 
-  /* Release the buffer for a given attribute */
+  /** Release the buffer for a given attribute */
   public release(attribute:string):void {
     if (this._bindings[attribute]) {
       var buffer = this._bindings[attribute].buffer;
@@ -160,7 +160,7 @@ export class Program {
     }
   }
 
-  /* Rebind buffers to the program */
+  /** Rebind buffers to the program */
   public load():void {
 
     var gl = this._glc.gl;

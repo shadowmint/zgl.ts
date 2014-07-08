@@ -1,6 +1,6 @@
-import b = require('./block');
+import b = require('./buffer');
 
-/* Cached matrix values for fast operations */
+/** Cached matrix values for fast operations */
 module matrix {
   export var ready:boolean = false;
   export var unity:b.Buffer<Float32Array> = null;
@@ -10,10 +10,10 @@ module matrix {
   export var rotatez:b.Buffer<Float32Array> = null;
   export var scale:b.Buffer<Float32Array> = null;
 
-  /* Load matrix helpers */
+  /** Load matrix helpers */
   export function init():void {
     var factory = ():b.Buffer<Float32Array> => {
-      return b.Buffer.factory(16).set([
+      return b.factory(16).set([
         1.0, 0.0, 0.0, 0.0,
         0.0, 1.0, 0.0, 0.0,
         0.0, 0.0, 1.0, 0.0,
@@ -30,42 +30,42 @@ module matrix {
   }
 }
 
-/* A 4x4 matrix for 3d operations */
+/** A 4x4 matrix for 3d operations */
 export class Mat4 {
 
-  /* The actual data for this matrix */
+  /** The actual data for this matrix */
   public _data:b.Buffer<Float32Array>;
 
   constructor() {
     if (!matrix.ready) {
       matrix.init();
     }
-    this._data = b.Buffer.factory(16);
+    this._data = b.factory(16);
     this.unity();
   }
 
-  /* Return raw data item */
+  /** Return raw data item */
   public raw():Float32Array {
     return this._data.data;
   }
 
-  /* Return the vp for this matrix */
+  /** Return the vp for this matrix */
   public vp():b.Buffer<Float32Array> {
     return this._data;
   }
 
-  /* Reset to unity value */
+  /** Reset to unity value */
   public unity():Mat4 {
     this._data.memset(0, matrix.unity, 0, 16);
     return this;
   }
 
-  /* Apply an arbitrary matrix multiplication */
+  /** Apply an arbitrary matrix multiplication */
   public multiply(m:Mat4):Mat4 {
     return this._multiply(m._data.data);
   }
 
-  /* Set the values of this matrix directly */
+  /** Set the values of this matrix directly */
   public set(data:number[]):Mat4 {
     for (var i = 0; i < 16; ++i) {
       this._data.data[i] = data[i];
@@ -73,7 +73,7 @@ export class Mat4 {
     return this;
   }
 
-  /* Apply an arbitrary matrix multiplication */
+  /** Apply an arbitrary matrix multiplication */
   private _multiply(m:Float32Array):Mat4 {
     var d = this._data.data;
     var s00 = d[0];
@@ -127,7 +127,7 @@ export class Mat4 {
     return this;
   }
 
-  /* Apply a translate transformation */
+  /** Apply a translate transformation */
   public translate(x:number = 0.0, y:number = 0.0, z:number = 0.0):Mat4 {
     matrix.translate.data[12] = 0.0 + x;
     matrix.translate.data[13] = 0.0 + y;
@@ -135,7 +135,7 @@ export class Mat4 {
     return this._multiply(matrix.translate.data);
   }
 
-  /* Apply a scale transformation */
+  /** Apply a scale transformation */
   public scale(x:number = 0.0, y:number = 0.0, z:number = 0.0):Mat4 {
     matrix.scale.data[0] = x;
     matrix.scale.data[5] = y;
@@ -143,7 +143,7 @@ export class Mat4 {
     return this._multiply(matrix.scale.data);
   }
 
-  /* Apply an x-axis rotate transformation */
+  /** Apply an x-axis rotate transformation */
   public rotateX(radians:number = 0.0):Mat4 {
     var sv = Math.sin(radians);
     var cv = Math.cos(radians);
@@ -154,7 +154,7 @@ export class Mat4 {
     return this._multiply(matrix.rotatex.data);
   }
 
-  /* Apply an y-axis rotate transformation */
+  /** Apply an y-axis rotate transformation */
   public rotateY(radians:number = 0.0):Mat4 {
     var sv = Math.sin(radians);
     var cv = Math.cos(radians);
@@ -165,7 +165,7 @@ export class Mat4 {
     return this._multiply(matrix.rotatey.data);
   }
 
-  /* Apply an z-axis rotate transformation */
+  /** Apply an z-axis rotate transformation */
   public rotateZ(radians:number = 0.0):Mat4 {
     var sv = Math.sin(radians);
     var cv = Math.cos(radians);
@@ -176,7 +176,7 @@ export class Mat4 {
     return this._multiply(matrix.rotatez.data);
   }
 
-  /* Frustum matrix */
+  /** Frustum matrix */
   public frustum(left:number = -1, right:number = 1, bottom:number = -1, top:number = 1, near:number = 0.1, far:number = 1):Mat4 {
     var _m = this._data.data;
     var w = right - left;

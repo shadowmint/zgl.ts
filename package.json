@@ -7,7 +7,11 @@
   "private": true,
   "devDependencies": {
     "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-connect": "^0.8.0",
     "grunt-contrib-nodeunit": "^0.4.1",
+    "grunt-contrib-uglify": "^0.5.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-requirejs": "^0.4.2",
     "grunt-typescript": "^0.3.7",
     "matchdep": "^0.3.0",
     "typescript": "~1.0.0"

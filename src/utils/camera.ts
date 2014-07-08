@@ -1,4 +1,4 @@
-import m = require('../../zgl/math/matrix');
+import m = require('../utils/matrix');
 import g = require('../geom/geometry');
 
 export class Camera {
@@ -16,30 +16,30 @@ export class Camera {
     this._buffer.push({attrib: u_modelview, data: this.modelview.vp(), mode: null});
   }
 
-  /* Look at position */
+  /** Look at position */
 
-  /* Set camera position */
+  /** Set camera position */
   public position(x:number, y:number, z:number):void {
     this.modelview.translate(-x, -y, -z);
   }
 
-  /* Set camera normal */
+  /** Set camera normal */
 
-  /* Move forwards */
+  /** Move forwards */
 
-  /* Move backwards */
+  /** Move backwards */
 
-  /* Move left */
+  /** Move left */
 
-  /* Move right */
+  /** Move right */
 
-  /* Move forwards */
+  /** Move forwards */
 
-  /* Move backwards */
+  /** Move backwards */
 
-  /* Orbit left around target */
+  /** Orbit left around target */
 
-  /* Orbit right around target */
+  /** Orbit right around target */
 
   public data():g.Data[] {
     return this._buffer;

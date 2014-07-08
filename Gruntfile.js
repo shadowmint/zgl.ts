@@ -5,7 +5,7 @@ module.exports = function (grunt) {
     ext.configure({
        path: {
            src: 'src',
-           build: 'build'
+           build: 'demo/build'
        }
     });
 
@@ -20,74 +20,59 @@ module.exports = function (grunt) {
     ext.configure({
         typescript: {
             zgl: {
-                src: ['<%= path.src %>/zgl/**/*.ts'],
-                dest: '<%= path.build %>/zgl',
+                src: ['<%= path.src %>/**/*.ts'],
+                dest: '<%= path.build %>',
                 options: {
                     module: 'commonjs',
                     target: 'es3',
                     basePath: '<%= path.src %>',
                     sourceMap: false,
-                    declaration: true,
-                    comments: true
+                    declaration: false,
+                    comments: false
                 }
             },
             zgl_amd: {
-                src: ['<%= path.src %>/zgl/**/*.ts'],
-                dest: '<%= path.build %>/zgl',
+                src: ['<%= path.src %>/**/*.ts'],
+                dest: '<%= path.build %>',
                 options: {
                     module: 'amd',
                     target: 'es3',
                     basePath: '<%= path.src %>',
-                    sourceMap: false,
+                    sourceMap: true,
                     declaration: true,
                     comments: true
                 }
             }
         },
         nodeunit: {
-            zgl: [ '<%= path.build %>/zgl/**/*_tests.js' ]
+            zgl: [ '<%= path.build %>/**/*_tests.js' ]
+        },
+        watch: {
+            zgl: {
+                files: ['<%= path.src %>/**/*'],
+                tasks: ['zgl'],
+                options: {
+                    spawn: true
+                }
+            }
         }
     });
     ext.registerTask('zgl', ['typescript:zgl', 'nodeunit:zgl', 'typescript:zgl_amd']);
 
-    // z3d
+    // Server
     ext.configure({
-        typescript: {
-            z3d: {
-                src: ['<%= path.src %>/z3d/**/*.ts'],
-                dest: '<%= path.build %>/z3d',
+        connect: {
+            lib: {
                 options: {
-                    module: 'commonjs',
-                    target: 'es3',
-                    basePath: '<%= path.src %>',
-                    sourceMap: false,
-                    declaration: true,
-                    comments: true
-                }
-            },
-            z3d_amd: {
-                src: ['<%= path.src %>/z3d/**/*.ts'],
-                dest: '<%= path.build %>/z3d',
-                options: {
-                    module: 'amd',
-                    target: 'es3',
-                    basePath: '<%= path.src %>',
-                    sourceMap: false,
-                    declaration: true,
-                    comments: true
+                    port: 3009,
+                    base: 'demo'
                 }
             }
-        },
-        nodeunit: {
-            z3d: [ '<%= path.build %>/z3d/**/*_tests.js' ]
         }
     });
-    ext.registerTask('z3d', ['typescript:z3d', 'nodeunit:z3d', 'typescript:z3d_amd']);
-
-    // Common build tasks
-    ext.registerTask('build', ['zgl', 'z3d'])
 
     // External tasks
     ext.initConfig(grunt);
-    grunt.registerTask('default', ['clean', 'build']);
+    grunt.registerTask('default', ['clean', 'zgl']);
+    grunt.registerTask('dev', ['default', 'connect', 'watch']);
 }
