@@ -78,12 +78,12 @@ export class HeightmapMesh implements p.Mesh {
                             c.pos[1] - (c.dy / 2 * c.block) + (c.block * j),
                             c.pos[2] + size[2] / 2
                     ];
-                    var c = new cube.Cube({
+                    var child = new cube.Cube({
                         size: size,
                         pos: center
                     });
-                    // this._cubes.push(c);
-                    // this._faces.push.apply(this._faces, c.faces());
+                    this._cubes.push(child);
+                    this._faces.push.apply(this._faces, child.mesh.faces());
                 }
             }
         }

@@ -74,15 +74,15 @@ export class Renderer {
 
         // Load geometry arrays
         var buffers = geom.data();
-        for (var i = 0; i < buffers.length; ++i) {
-          var buffer = buffers[i];
+        for (var j = 0; j < buffers.length; ++j) {
+          var buffer = buffers[j];
           this._program.buffer(buffer.attrib, buffer.data, buffer.mode);
         }
 
         // Load camera data
         buffers = camera.data();
-        for (var i = 0; i < buffers.length; ++i) {
-          var buffer = buffers[i];
+        for (var j = 0; j < buffers.length; ++j) {
+          var buffer = buffers[j];
           this._program.buffer(buffer.attrib, buffer.data, buffer.mode);
         }
 

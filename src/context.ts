@@ -34,7 +34,7 @@ export class Context {
     }
   }
 
-  /*
+  /**
    * Turn debugging on.
    * Notice that this requires the webgl debugging library to be loaded:
    * https://www.khronos.org/registry/webgl/sdk/debug/webgl-debug.js
@@ -44,14 +44,24 @@ export class Context {
       if (!window['WebGLDebugUtils']) {
         throw new Error('Debugging is only possible if <script src="https://www.khronos.org/registry/webgl/sdk/debug/webgl-debug.js"></script> is loaded');
       }
-      this.gl = window['WebGLDebugUtils'].makeDebugContext(this.gl, (err) => (this.trace('zgl error: ' + err.toString())));
+      this.gl = window['WebGLDebugUtils'].makeDebugContext(this.gl, (err, call, args) => {
+        var error = window['WebGLDebugUtils'].glEnumToString(err);
+        this.error(error, call, args);
+      });
     }
   }
 
-  /** Trace debugging errors to console; monkey patch to update */
-  private trace(msg:string):void {
+  /** Log debugging errors to console; monkey patch to update */
+  private log(msg:string):void {
     if (window['console']) {
       window['console'].log(msg);
+    }
+  }
+
+  /** Trace error stack */
+  private trace(msg:string):void {
+    if (window['console']) {
+      window['console'].trace();
     }
   }
 
@@ -82,6 +92,15 @@ export class Context {
     }
   }
 
+  /** Error reporter */
+  public error(...e:any[]):void {
+    console.trace();
+    for (var i = 0; i < e.length; ++i) {
+      this.log(e[i]);
+    }
+    throw new Error('webgl state is not clean.');
+  }
+
   /** Stop the animation handler */
   public stop():void {
     this._running = false;
@@ -91,13 +110,12 @@ export class Context {
   public check():void {
     var last = this.gl.getError();
     if (last != this.gl.NO_ERROR) {
-      console.trace();
-      throw new Error('webgl state is not clean');
+      this.error(last);
     }
   }
 }
 
-/*
+/**
  * Return a GL interface for the given canvas element
  * If canvas is a string, getElementById is used to fetch it.
  * @param canvas A string or canvas object.

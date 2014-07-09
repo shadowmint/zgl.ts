@@ -43,7 +43,10 @@ export class Program {
   /** Keep a copy of the context to work with */
   private _glc:c.Context;
 
-  /*
+  /** Run this action during bind for custom attributes */
+  public extra:{(p:Program):void} = null;
+
+  /**
    * Create a program for a set of shaders
    * @param gl The gl context
    * @param shaders The set of shaders
@@ -54,7 +57,7 @@ export class Program {
     this.reload();
   }
 
-  /*
+  /**
    * Reload the program from saved values.
    * @param gl The gl context
    */
@@ -115,17 +118,7 @@ export class Program {
     this.update(attribute);
   }
 
-  /** Convert this block into an opengl buffer */
-  private _createBuffer(mem:b.Mem):void {
-    var gl = this._glc.gl;
-    mem.buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, mem.buffer);
-    if (gl.getError() != gl.NO_ERROR) {
-      throw new Error("Error creating data buffer");
-    }
-  }
-
-  /*
+  /**
    * Push the inner data into the gl buffer.
    * Notice this is only required for per-vertex attributes; for uniform values there
    * is no need to invoke this; and if the mode is not specified it does nothing.
@@ -140,8 +133,9 @@ export class Program {
     var mode = attrib.mode;
     if (mode != null) {
       if (buffer.mem.buffer == null) {
-        this._createBuffer(buffer.mem);
+        buffer.mem.buffer = gl.createBuffer();
       }
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer.mem.buffer);
       gl.bufferData(gl.ARRAY_BUFFER, buffer.mem.data, mode);
       if (gl.getError() != gl.NO_ERROR) {
         throw new Error("Error buffering data on array");
@@ -167,6 +161,11 @@ export class Program {
 
     // Load the program
     gl.useProgram(this.program);
+
+    // Bind each additional buffer if required
+    if (this.extra != null) {
+      this.extra(this);
+    }
 
     // Now bind each buffer to each program location
     for (var key in this._bindings) {
@@ -231,6 +230,9 @@ export class Program {
           gl.enableVertexAttribArray(attrib.location);
           gl.vertexAttribPointer(attrib.location, 4, gl.FLOAT, false, 0, 0);
           break;
+
+        default:
+          throw Error('Invalid buffer type: ' + attrib.type);
       }
     }
   }
