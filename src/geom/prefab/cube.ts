@@ -4,10 +4,10 @@ import geom = require('../geometry');
 
 /** It's a cube */
 export class Cube extends geom.Config {
-    
+
   /** The distinct points that comprise this cube */
   public points:p.Point[] = null;
-    
+
   /** Position for this cube */
   public pos:number[] = [0.0, 0.0, 0.0];
 

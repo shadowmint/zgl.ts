@@ -20,7 +20,6 @@ export class Textures {
   public bind(c:c.Context, texture:HTMLImageElement):any {
     var name = texture.src;
     if (!Textures.__cache[name]) {
-      console.log('BIND TEXTURE');
       Textures.__cache[name] = {
         src: texture,
         texture: this._bind(c, texture)

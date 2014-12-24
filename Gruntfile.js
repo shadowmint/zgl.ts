@@ -5,14 +5,16 @@ module.exports = function (grunt) {
     ext.configure({
        path: {
            src: 'src',
-           build: 'demo/build'
+           tmp: 'dist/zgl',
+           dist: 'dist/zgl.js',
+           dist_min: 'dist/zgl.min.js',
        }
     });
 
     // Clean
     ext.configure({
         clean: {
-            src: ['<%= path.build %>']
+          src: ['dist/*']
         }
     });
 
@@ -21,7 +23,7 @@ module.exports = function (grunt) {
         typescript: {
             zgl: {
                 src: ['<%= path.src %>/**/*.ts'],
-                dest: '<%= path.build %>',
+                dest: '<%= path.tmp %>',
                 options: {
                     module: 'commonjs',
                     target: 'es3',
@@ -30,22 +32,24 @@ module.exports = function (grunt) {
                     declaration: false,
                     comments: false
                 }
-            },
-            zgl_amd: {
-                src: ['<%= path.src %>/**/*.ts'],
-                dest: '<%= path.build %>',
-                options: {
-                    module: 'amd',
-                    target: 'es3',
-                    basePath: '<%= path.src %>',
-                    sourceMap: true,
-                    declaration: true,
-                    comments: true
-                }
             }
         },
         nodeunit: {
-            zgl: [ '<%= path.build %>/**/*_tests.js' ]
+            zgl: [ '<%= path.tmp %>/**/*_tests.js' ]
+        },
+        browserify: {
+          zgl: {
+            files: {
+              '<%= path.dist %>': ['<%= path.tmp %>/**/*.js', '!**/*_tests.js']
+            }
+          }
+        },
+        uglify: {
+          zgl: {
+            files: {
+              '<%= path.dist_min %>': '<%= path.dist %>'
+            }
+          }
         },
         watch: {
             zgl: {
@@ -57,7 +61,7 @@ module.exports = function (grunt) {
             }
         }
     });
-    ext.registerTask('zgl', ['typescript:zgl', 'nodeunit:zgl', 'typescript:zgl_amd']);
+    ext.registerTask('zgl', ['typescript:zgl', 'nodeunit:zgl', 'browserify:zgl', 'uglify:zgl']);
 
     // Server
     ext.configure({
@@ -65,7 +69,7 @@ module.exports = function (grunt) {
             lib: {
                 options: {
                     port: 3009,
-                    base: 'demo'
+                    base: '.'
                 }
             }
         }

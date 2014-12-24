@@ -1,0 +1,65 @@
+<head>
+    <style>
+        canvas {
+            width: 300px;
+            height: 300px;
+            border: 2px solid #efefef;
+        }
+
+        img {
+            width: 40px;
+            height: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<img id='texture' src="texture.png"/> <br/>
+<canvas id="webgl" width="300px" height="300px"></canvas>
+
+<script id="2d-vertex-shader" type="x-shader/x-vertex">
+  attribute vec3 a_vertex;
+  attribute vec4 a_color;
+  attribute vec2 a_uv;
+
+  uniform mat4 u_proj;
+  uniform mat4 u_model;
+  uniform float u_time_offset;
+
+  varying vec4 v_color;
+  varying float v_time_offset;
+  varying vec2 v_uv;
+
+  void main(void) {
+    gl_Position = u_proj * u_model * vec4(a_vertex, 1.0);
+    v_color = a_color;
+    v_time_offset = u_time_offset;
+    v_uv = a_uv;
+  }
+</script>
+
+<script id="2d-fragment-shader" type="x-shader/x-fragment">
+  precision mediump float;
+  uniform sampler2D u_sampler;
+  varying vec4 v_color;
+  varying float v_time_offset;
+  varying vec2 v_uv;
+
+  void main() {
+    float r = sin(v_time_offset + gl_FragCoord[0] / 100.0);
+    float g = sin(v_time_offset + gl_FragCoord[1] / 100.0);
+    float b = 1.0;
+    vec4 t = texture2D(u_sampler, vec2(v_uv.s, v_uv.t));
+    r = r * 0.2 + t[0] * 0.8;
+    g = g * 0.2 + t[1] * 0.8;
+    b = b * 0.2 + t[2] * 0.8;
+    gl_FragColor = vec4(r,g,b,1.0);
+  }
+</script>
+
+<script src="https://www.khronos.org/registry/webgl/sdk/debug/webgl-debug.js"></script>
+<script src="../dist/zgl.js"></script>
+<script>
+    zgl.tests.shader('webgl', '2d-vertex-shader', '2d-fragment-shader', 'texture');
+</script>
+</body>
