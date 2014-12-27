@@ -45,19 +45,14 @@
 
   <script id="2d-fragment-shader" type="x-shader/x-fragment">
     precision mediump float;
-    uniform sampler2D u_sampler;
     varying vec4 v_color;
     varying float v_time_offset;
     varying vec2 v_uv;
 
     void main() {
-      float r = sin(v_time_offset + gl_FragCoord[0] / 100.0);
-      float g = sin(v_time_offset + gl_FragCoord[1] / 100.0);
+      float r = sin(v_time_offset + gl_FragCoord[0] / 10.0) * sin(v_time_offset + gl_FragCoord[1] / 10.0);
+      float g = cos(v_time_offset + 1.0 - gl_FragCoord[0] / 10.0) * sin(v_time_offset + 1.0 + gl_FragCoord[1] / 10.0);
       float b = 1.0;
-      vec4 t = texture2D(u_sampler, vec2(v_uv.s, v_uv.t));
-      r = r * 0.2 + t[0] * 0.8;
-      g = g * 0.2 + t[1] * 0.8;
-      b = b * 0.2 + t[2] * 0.8;
       gl_FragColor = vec4(r,g,b,1.0);
     }
   </script>
@@ -105,7 +100,6 @@
         program.bind('a_uv', zgl.BufferType.VERTEX_FLOAT2);
         program.bind('u_proj', zgl.BufferType.UNIFORM_MAT4);
         program.bind('u_model', zgl.BufferType.UNIFORM_MAT4);
-        program.bind('u_sampler', zgl.BufferType.UNIFORM_SAMPLER);
         program.bind('u_time_offset', zgl.BufferType.UNIFORM_FLOAT);
 
         // Timer is not generated from the geom source; make sure
@@ -123,9 +117,8 @@
       scene.background = [0.0, 0.0, 0.0, 1.0];
 
       // Create some geometry
-      var texture = document.getElementById('texture');
       var quad = new zgl.prefab.Quad({
-        texture: texture,
+        texture: null,
         size: [1.0, 1.0, 1.0],
         position: [0.0, -1.0, 0.0]
       });
@@ -136,7 +129,6 @@
       // Set the camera view
       scene.camera.modelview.unity().rotateZ(3.1415).translate(0, 0, -0.8);
 
-      // Update the timer each frame
       // Update the timer each frame
       var timer = 0;
       scene.update = function() {

@@ -133,7 +133,7 @@ export class Geometry {
         this._uv = this._buffers[2];
 
         // Bind texture
-        if (this.texture == null) {
+        if ((this.texture == null) && (this._config.texture != null)) {
           this.texture = cache.bind(context, this._config.texture);
         }
 
@@ -141,15 +141,19 @@ export class Geometry {
         this._buffer.push({attrib: this._config.a_color, data: this._color, mode: gl.STATIC_DRAW});
         this._buffer.push({attrib: this._config.a_vertex, data: this._vertex, mode: gl.STATIC_DRAW});
         this._buffer.push({attrib: this._config.a_uv, data: this._uv, mode: gl.STATIC_DRAW});
-        this._buffer.push({attrib: this._config.u_sampler, data: this.texture, mode: null});
+        if (this.texture != null) {
+          this._buffer.push({attrib: this._config.u_sampler, data: this.texture, mode: null});
+        }
 
         // Buid element arrays
         var points = p.export_mesh(faces);
 
         // Build buffers
         this._color.set(points.color);
-        this._uv.set(points.uv);
         this._vertex.set(points.vertex);
+        if (this.texture != null) {
+          this._uv.set(points.uv);
+        }
       }
     }
     return this;

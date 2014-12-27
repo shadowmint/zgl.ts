@@ -1,4 +1,3 @@
-import tests_ = require('./utils/tests');
 import scene_ = require('./draw/scene')
 import renderer_ = require('./draw/renderer')
 import buffer_ = require('./utils/buffer');
@@ -14,7 +13,6 @@ import geometry_ = require('./geom/geometry');
 export module zgl {
 
   // Basic module exports
-  export var tests = tests_;
   export var renderer = renderer_;
   export var scene = scene_;
   export var buffer = buffer_;

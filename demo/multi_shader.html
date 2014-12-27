@@ -17,9 +17,7 @@
 </head>
 
 <body>
-
-  <img id='texture' src="texture.png" />
-  <br/>
+  <img id='texture' src="texture.png" /><br/>
   <canvas id="webgl" width="300px" height="300px"></canvas>
 
   <script id="2d-vertex-shader" type="x-shader/x-vertex">
@@ -62,12 +60,30 @@
     }
   </script>
 
+  <script id="2d-fragment-shader-2" type="x-shader/x-fragment">
+    precision mediump float;
+    uniform sampler2D u_sampler;
+    varying vec4 v_color;
+    varying float v_time_offset;
+    varying vec2 v_uv;
+
+    void main() {
+      float r = cos(v_time_offset + gl_FragCoord[0] / 100.0);
+      float g = cos(v_time_offset + gl_FragCoord[1] / 100.0);
+      float b = 1.0;
+      vec4 t = texture2D(u_sampler, vec2(v_uv.s, v_uv.t));
+      r = r * 0.2 + t[0] * 0.8;
+      g = g * 0.9 + t[1] * 0.1;
+      b = b * 0.2 + t[2] * 0.8;
+      gl_FragColor = vec4(r,g,b,1.0);
+    }
+  </script>
+
   <script src="https://www.khronos.org/registry/webgl/sdk/debug/webgl-debug.js"></script>
   <script src="../dist/zgl.js"></script>
   <script>
     var glc;
     try {
-
       // Load webgl context
       try {
         glc = zgl.context('webgl');
@@ -75,7 +91,7 @@
         glc.viewport();
       } catch (e) {
         console.log('No webgl');
-        throw (e);
+        throw(e);
       }
 
       // Setup~
@@ -86,14 +102,41 @@
       time_offset.data[0] = 0.0;
 
       // Create a set of renderers to use
-      var renderer = scene.renderer();
+      var renderer1 = scene.renderer();
+      var renderer2 = scene.renderer();
 
       // Load program
-      renderer.program = function(glc) {
+      renderer1.program = function(glc) {
         var gl = glc.gl;
 
         var vertexShader = zgl.shader.fromScript("2d-vertex-shader");
         var fragmentShader = zgl.shader.fromScript("2d-fragment-shader");
+        var program = new zgl.program.Program(glc, {
+          vertex: vertexShader,
+          fragment: fragmentShader
+        });
+
+        // Bind shader attributes
+        program.bind('a_vertex', zgl.BufferType.VERTEX_FLOAT3);
+        program.bind('a_color', zgl.BufferType.VERTEX_FLOAT4);
+        program.bind('a_uv', zgl.BufferType.VERTEX_FLOAT2);
+        program.bind('u_proj', zgl.BufferType.UNIFORM_MAT4);
+        program.bind('u_model', zgl.BufferType.UNIFORM_MAT4);
+        program.bind('u_sampler', zgl.BufferType.UNIFORM_SAMPLER);
+        program.bind('u_time_offset', zgl.BufferType.UNIFORM_FLOAT);
+
+        // Timer is not generated from the geom source; make sure
+        // we populate that shader attribute each frame.
+        program.extra = function(p) {
+          program.buffer('u_time_offset', time_offset);
+        };
+        return program;
+      };
+      renderer2.program = function(glc) {
+        var gl = glc.gl;
+
+        var vertexShader = zgl.shader.fromScript("2d-vertex-shader");
+        var fragmentShader = zgl.shader.fromScript("2d-fragment-shader-2");
         var program = new zgl.program.Program(glc, {
           vertex: vertexShader,
           fragment: fragmentShader
@@ -124,25 +167,55 @@
 
       // Create some geometry
       var texture = document.getElementById('texture');
-      var quad = new zgl.prefab.Quad({
+      var cube1 = new zgl.prefab.Cube({
         texture: texture,
         size: [1.0, 1.0, 1.0],
         position: [0.0, -1.0, 0.0]
       });
+      var cube2 = new zgl.prefab.Cube({
+        texture: texture,
+        size: [0.5, 4.0, 0.5],
+        position: [1.0, 0.0, 1.0]
+      });
+      var map = new zgl.prefab.Heightmap({
+        texture: texture,
+        position: [0.0, 0.0, 0.0],
+        dx: 5,
+        dy: 5,
+        heights: [
+          0, 1, 2, 1, 0,
+          1, 2, 2, 2, 1,
+          2, 3, 5, 3, 2,
+          1, 2, 3, 2, 1,
+          0, 1, 2, 1, 0
+        ],
+        types: [
+          0, 1, 2, 1, 0,
+          1, 2, 2, 2, 1,
+          2, 3, 5, 3, 2,
+          1, 2, 3, 2, 1,
+          0, 1, 2, 1, 0
+        ]
+      });
 
       // Add geometry
-      renderer.add(quad.compile(glc, scene.textures));
+      renderer1.add(map.compile(glc, scene.textures));
+      renderer1.add(cube1.compile(glc, scene.textures));
+      renderer2.add(cube2.compile(glc, scene.textures));
+      glc.check();
 
-      // Set the camera view
-      scene.camera.modelview.unity().rotateZ(3.1415).translate(0, 0, -0.8);
-
-      // Update the timer each frame
-      // Update the timer each frame
+      // Updater
       var timer = 0;
-      scene.update = function() {
-        timer += 1;
-        time_offset.data[0] = timer * 0.1;
+      scene.update = function(step) {
+        timer += step; // Only update in first renderer
+        time_offset.data[0] = timer * 0.001;
+        scene.camera.modelview.unity().rotateX(timer * 0.001).rotateZ(timer * 0.001).translate(0, 0, -4);
       };
+      glc.check();
+
+      // Turn depth testing on
+      glc.gl.enable(glc.gl.DEPTH_TEST);
+      glc.gl.depthFunc(glc.gl.LESS);
 
       // Render each frame
       glc.run(function(step) {
